@@ -1,0 +1,133 @@
+data_validation_task:
+  description: >
+    Analise os dados recebidos sobre o tratamento e valide sua integridade para a criação do protocolo high-ticket.
+
+    DADOS RECEBIDOS:
+    - Nome do Médico: {nome_medico}
+    - Especialidade: {especialidade}
+    - Missão/Autoridade: {missao_autoridade}
+    - Experiência: {tempo_experiencia}
+    - Dores do Paciente: {dor_paciente}
+    - Prognóstico de Não Tratamento: {prognostico_nao_tratamento}
+    - Fase 1: {fase_1}
+    - Fase 2: {fase_2}
+    - Fase 3: {fase_3}
+    - Tempo Total: {tempo_total}
+    - Valor Avulso: {valor_avulso}
+    - Valor no Protocolo: {valor_protocolo}
+    - Bônus Inclusos: {bonus_inclusos}
+    - Gatilho de Urgência: {gatilho_urgencia}
+
+    REGRAS DE VALIDAÇÃO:
+    1. Confirme se os dados do médico geram autoridade suficiente para a "Sessão 2 - Quem Sou Eu".
+    2. Identifique as "Dores" e prepare o contexto para o Prognóstico.
+    3. Confirme se há distinção clara entre "Valor Avulso" (ancoragem alta) e "Valor no Protocolo".
+    4. ALERTA ESTRATÉGICO: Certifique-se de que palavras como "pacote", "dieta" ou procedimentos "googláveis" (ex: jejum, low carb) sejam marcados para exclusão.
+
+  expected_output: >
+    Um relatório estruturado confirmando os dados validados e dando as diretrizes para a equipe sobre a ancoragem de preço e substituição de termos técnicos comuns por nomes aspiracionais.
+
+  agent: input_analyst
+
+narrative_strategy_task:
+  description: >
+    Com base nos dados validados, escreva as seções narrativas do documento, focando em autoridade e copy emocional de alto impacto. 
+    NUNCA use as palavras "pacote" ou "dieta". Use "Protocolo Definitivo" e "Plano Alimentar Estratégico".
+
+    SEÇÃO 2 - QUEM SOU EU (AUTORIDADE):
+    Escreva em primeira pessoa pelo Dr(a). {nome_medico}, {especialidade}.
+    Incorpore o tempo de experiência ({tempo_experiencia}) e missão ({missao_autoridade}).
+    Deixe a marcação "[FOTO PROFISSIONAL E TODO SEU CURRÍCULO]".
+    
+    SEÇÃO 3 - O PLANO HEALTH WELLNESS:
+    - Para quem é: Transforme as dores ({dor_paciente}) em condições de indicação (bullet points).
+    - Resultados Esperados: Liste resultados emocionais e físicos, com métricas e abrindo loops de curiosidade (sem entregar o "como").
+    - Prognóstico de Não Tratamento: Use tom firme para mostrar as consequências severas de adiar o tratamento ({prognostico_nao_tratamento}).
+
+  expected_output: >
+    Texto em Markdown contendo a SESSÃO 2 e SESSÃO 3 formatadas, com linguagem persuasiva de alto ticket e zero jargões de tratamentos baratos.
+
+  agent: health_copywriter
+
+clinical_structure_task:
+  description: >
+    Transforme as informações clínicas em uma jornada aspiracional de alto valor agregado.
+
+    DADOS DO TRATAMENTO:
+    - Fase 1: {fase_1}
+    - Fase 2: {fase_2}
+    - Fase 3: {fase_3}
+    - Tempo Total: {tempo_total}
+
+    REGRAS DE CONSTRUÇÃO (SESSÃO 4):
+    1. Divida em EXATAMENTE 3 Fases conforme os dados fornecidos.
+    2. CRIE NOMES ASPIRACIONAIS: Nunca entregue o ouro técnico. Se o médico enviou nomes clínicos e técnicos (ex: jejum, botox), tranforme em nomes focados em benefícios (ex: "Protocolo de Queima", "Arquitetura Visual").
+    3. Para cada fase, estruture claramente: O NOME ASPIRACIONAL, O TEMPO DE DURAÇÃO e A LISTA EXATA DE ENTREGÁVEIS (consultas, exames, materiais).
+    4. O tempo total e as metas de cada fase devem estar em harmonia estrutural.
+
+  expected_output: >
+    Um roteiro estruturado em Markdown com as 3 fases detalhadas e com nomes altamente atrativos focados em benefícios, pronto para a tabela financeira.
+
+  agent: protocol_architect
+
+commercial_pricing_task:
+  description: >
+    Estruture a "Oferta Irresistível" aplicando a ancoragem de preço e o gatilho de urgência.
+
+    DADOS FINANCEIROS:
+    - Valor Avulso Total: {valor_avulso}
+    - Valor no Protocolo: {valor_protocolo}
+    - Bônus Inclusos: {bonus_inclusos}
+    - Fases: Estrutura entregue pelo Arquiteto Clínico.
+
+    REGRAS DA TABELA (SESSÃO 4):
+    1. Crie uma TABELA MARKDOWN EXATAMENTE com as colunas: FASE | ENTREGÁVEIS | VALOR AVULSO | VALOR NO PLANO DE TRATAMENTO
+    2. O "Valor Avulso" deve gerar um choque (ANCORAGEM ALTA).
+    3. Adicione uma linha de TOTAL no final.
+    4. Liste os Bônus como "CORTESIA PREMIUM".
+    
+    GATILHOS APÓS A TABELA:
+    - Gatilho de Urgência/Fechamento: Incorpore a seguinte condição: "{gatilho_urgencia}". Caso esteja em branco, use um padrão de fechamento em 24h.
+    - Desconto PIX à vista (-20%) e Parcelamento (até 12x).
+    - Downsell/Shopping: Sugira 1 produto mais barato (ex: nutrição comportamental online) caso o paciente não feche o High-Ticket.
+    - Observações Legais sobre desistência.
+
+  expected_output: >
+    Tabela financeira em Markdown perfeita, aplicando forte ancoragem de preço, o gatilho de fechamento em 24h, opções de pagamento e a opção de downsell.
+
+  agent: financial_analyst
+
+final_assembly_task:
+  description: >
+    Compile e refine TODO o conteúdo em um ÚNICO documento final coeso e formatado.
+
+    ESTRUTURA OBRIGATÓRIA (siga os nomes exatos das sessões e esta ordem):
+
+    1ª SESSÃO - [LOGO DA CLÍNICA]
+    # Protocolo de Tratamento Definitivo
+    ## Dr(a). {nome_medico}
+    ---
+    2ª SESSÃO - QUEM SOU EU (AUTORIDADE)
+    [FOTO PROFISSIONAL]
+    (Inserir texto do copywriter)
+    ---
+    3ª SESSÃO - O PLANO HEALTH WELLNESS
+    **Tempo de Tratamento:** {tempo_total}
+    (Inserir Para Quem É, Resultados e Prognóstico do copywriter)
+    ---
+    4ª SESSÃO - COMO FAZER E INVESTIMENTO
+    (Inserir as Fases descritivas do Arquiteto)
+    (Inserir Tabela Financeira, Gatilhos de 24h e Pagamento do Analista)
+    ---
+    Frase de fechamento motivacional
+
+    REGRAS DE FORMATAÇÃO:
+    - Use # para título principal, ## para seções.
+    - Use tabelas Markdown (|col|) para dados financeiros.
+    - DESTRUA qualquer menção a "pacote" ou "dieta".
+    - Garanta tom de voz PREMIUM do início ao fim.
+
+  expected_output: >
+    O documento COMPLETO do protocolo em Markdown puro, seguindo as 4 Sessões obrigatórias, com design limpo e gatilhos mentais aplicados perfeitamente.
+
+  agent: chief_editor

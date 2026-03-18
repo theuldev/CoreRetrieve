@@ -18,13 +18,13 @@
                     fontFamily: { sans: ['Outfit', 'sans-serif'] },
                     colors: {
                         rag: {
-                            blue: '#3B82F6',
-                            blueDark: '#1D4ED8',
-                            blueLight: '#60A5FA',
-                            dark: '#0A0A0F',
-                            panel: '#111827',
-                            accent: '#1F2937',
-                            text: '#E0E0E0'
+                            gray: '#a1a1aa',
+                            grayDark: '#52525b',
+                            grayLight: '#d4d4d8',
+                            dark: '#000000',
+                            panel: '#09090b',
+                            accent: '#18181b',
+                            text: '#fafafa'
                         }
                     }
                 }
@@ -36,30 +36,87 @@
 
 <body class="bg-rag-dark text-rag-text h-screen overflow-hidden font-sans">
 
-    <div class="flex h-full">
+    <!-- LOGIN / REGISTER OVERLAY -->
+    <div id="auth-modal" class="fixed inset-0 z-[200] flex items-center justify-center bg-rag-dark">
+        <div class="relative w-full max-w-md bg-rag-panel border border-white/10 rounded-2xl shadow-2xl p-8 transform transition-all duration-300">
+            <div class="flex items-center justify-center gap-3 mb-8">
+                <div class="w-12 h-12 rounded-xl bg-rag-panel border border-rag-gray/30 flex items-center justify-center shadow-lg">
+                    <i data-lucide="brain-circuit" class="w-6 h-6 text-rag-gray"></i>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-bold tracking-wide text-white">CoreRetrieve</h1>
+                    <p class="text-xs text-rag-grayLight font-medium tracking-wider uppercase">Authentication</p>
+                </div>
+            </div>
+
+            <!-- Login Form -->
+            <form id="login-form" class="space-y-5">
+                <div>
+                    <label class="block text-sm font-medium text-gray-400 mb-1">Email</label>
+                    <input type="email" id="login-email" required
+                        class="w-full bg-rag-dark border border-white/10 text-white rounded-lg px-4 py-2.5 outline-none focus:border-rag-gray/50 transition-colors">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-400 mb-1">Senha</label>
+                    <input type="password" id="login-password" required
+                        class="w-full bg-rag-dark border border-white/10 text-white rounded-lg px-4 py-2.5 outline-none focus:border-rag-gray/50 transition-colors">
+                </div>
+                <button type="submit"
+                    class="w-full py-3 rounded-lg font-medium text-white bg-rag-gray hover:bg-rag-grayDark transition-colors shadow-lg shadow-blue-600/20">
+                    Entrar
+                </button>
+                <p class="text-center text-sm text-gray-500 mt-4">
+                    Não tem uma conta? <button type="button" onclick="toggleAuthMode()" class="text-rag-grayLight hover:underline">Registrar-se</button>
+                </p>
+            </form>
+
+            <!-- Register Form (Hidden by default) -->
+            <form id="register-form" class="space-y-5 hidden">
+                <div>
+                    <label class="block text-sm font-medium text-gray-400 mb-1">Email</label>
+                    <input type="email" id="register-email" required
+                        class="w-full bg-rag-dark border border-white/10 text-white rounded-lg px-4 py-2.5 outline-none focus:border-rag-gray/50 transition-colors">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-400 mb-1">Senha</label>
+                    <input type="password" id="register-password" required
+                        class="w-full bg-rag-dark border border-white/10 text-white rounded-lg px-4 py-2.5 outline-none focus:border-rag-gray/50 transition-colors">
+                </div>
+                <button type="submit"
+                    class="w-full py-3 rounded-lg font-medium text-white bg-rag-gray hover:bg-rag-grayDark transition-colors shadow-lg shadow-blue-600/20">
+                    Criar Conta
+                </button>
+                <p class="text-center text-sm text-gray-500 mt-4">
+                    Já tem uma conta? <button type="button" onclick="toggleAuthMode()" class="text-rag-grayLight hover:underline">Fazer Login</button>
+                </p>
+            </form>
+        </div>
+    </div>
+    
+    <div class="flex h-full filter blur-md pointer-events-none transition-all duration-500" id="main-app-content">
 
         <aside id="sidebar"
             class="fixed inset-y-0 left-0 z-50 w-64 bg-rag-panel border-r border-rag-accent/50 transform -translate-x-full transition-transform duration-300 md:relative md:translate-x-0 flex flex-col">
 
             <div class="p-4 border-b border-rag-accent/50 flex flex-col gap-4">
                 <div class="flex items-center justify-between">
-                    <h2 class="text-xs font-semibold text-rag-blue uppercase tracking-widest">Menu</h2>
+                    <h2 class="text-xs font-semibold text-rag-gray uppercase tracking-widest">Menu</h2>
                     <button id="close-sidebar-btn" class="md:hidden text-gray-400 hover:text-white">
                         <i data-lucide="x" class="w-5 h-5"></i>
                     </button>
                 </div>
                 <div class="flex flex-col items-center justify-center py-2 gap-2">
                     <div class="w-12 h-12 rounded-xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center">
-                        <i data-lucide="database" class="w-6 h-6 text-rag-blue"></i>
+                        <i data-lucide="database" class="w-6 h-6 text-rag-gray"></i>
                     </div>
-                    <span class="text-[10px] text-rag-blue font-bold tracking-[0.3em] uppercase">CoreRetrieve</span>
+                    <span class="text-[10px] text-rag-gray font-bold tracking-[0.3em] uppercase">CoreRetrieve</span>
                     <span class="text-[9px] text-gray-500 tracking-wider">Motor Semântico</span>
                 </div>
             </div>
 
             <div class="p-4">
                 <button id="new-chat-btn"
-                    class="w-full flex items-center justify-center gap-2 bg-rag-blue/10 hover:bg-rag-blue/20 text-rag-blue border border-rag-blue/50 rounded-lg p-3 transition-all hover:shadow-lg shadow-rag-blue/5 group">
+                    class="w-full flex items-center justify-center gap-2 bg-rag-gray/10 hover:bg-rag-gray/20 text-rag-gray border border-rag-gray/50 rounded-lg p-3 transition-all hover:shadow-lg shadow-rag-gray/5 group">
                     <i data-lucide="plus" class="w-4 h-4 group-hover:scale-110 transition-transform"></i>
                     <span class="font-medium">Nova Consulta</span>
                 </button>
@@ -68,7 +125,7 @@
             <div class="px-4 pb-3">
                 <button id="open-docs-btn"
                     class="w-full flex items-center justify-center gap-2 bg-rag-accent hover:bg-rag-accent/80 text-gray-300 hover:text-white border border-white/5 rounded-lg p-2.5 transition-all text-sm group">
-                    <i data-lucide="file-up" class="w-4 h-4 text-rag-blueLight group-hover:scale-110 transition-transform"></i>
+                    <i data-lucide="file-up" class="w-4 h-4 text-rag-grayLight group-hover:scale-110 transition-transform"></i>
                     <span>Gerenciar Documentos</span>
                 </button>
             </div>
@@ -100,11 +157,11 @@
 
             <header class="border-b border-rag-accent/50 bg-rag-dark/80 backdrop-blur-md p-4 flex items-center justify-between z-10">
                 <div class="flex items-center gap-3">
-                    <button id="open-sidebar-btn" class="md:hidden text-gray-400 hover:text-rag-blue transition-colors p-2 -ml-2">
+                    <button id="open-sidebar-btn" class="md:hidden text-gray-400 hover:text-rag-gray transition-colors p-2 -ml-2">
                         <i data-lucide="menu" class="w-5 h-5"></i>
                     </button>
-                    <div class="w-10 h-10 rounded-xl bg-rag-panel border border-rag-blue/30 flex items-center justify-center shadow-lg">
-                        <i data-lucide="brain-circuit" class="w-5 h-5 text-rag-blue"></i>
+                    <div class="w-10 h-10 rounded-xl bg-rag-panel border border-rag-gray/30 flex items-center justify-center shadow-lg">
+                        <i data-lucide="brain-circuit" class="w-5 h-5 text-rag-gray"></i>
                     </div>
                     <div>
                         <h1 class="text-xl font-semibold tracking-wide text-white">CoreRetrieve</h1>
@@ -113,7 +170,7 @@
                 </div>
                 <div class="hidden md:flex items-center gap-2">
                     <span class="text-xs text-gray-500">Modo ativo:</span>
-                    <span id="header-rag-type" class="text-xs font-semibold text-rag-blueLight bg-rag-blue/10 border border-rag-blue/30 rounded-full px-3 py-1">
+                    <span id="header-rag-type" class="text-xs font-semibold text-rag-grayLight bg-rag-gray/10 border border-rag-gray/30 rounded-full px-3 py-1">
                         Básico
                     </span>
                 </div>
@@ -123,8 +180,8 @@
                 <div class="max-w-3xl mx-auto space-y-6 pb-24">
 
                     <div class="flex gap-4 animate-fade-in flex-col items-center mb-10 text-center">
-                        <div class="w-20 h-20 rounded-2xl bg-rag-blue/10 border border-rag-blue/30 flex items-center justify-center mb-2 shadow-lg shadow-blue-900/20">
-                            <i data-lucide="search-code" class="w-10 h-10 text-rag-blue"></i>
+                        <div class="w-20 h-20 rounded-2xl bg-rag-gray/10 border border-rag-gray/30 flex items-center justify-center mb-2 shadow-lg shadow-blue-900/20">
+                            <i data-lucide="search-code" class="w-10 h-10 text-rag-gray"></i>
                         </div>
                         <div class="max-w-md bg-rag-panel/60 backdrop-blur-sm p-6 rounded-2xl border border-white/5 shadow-2xl">
                             <p class="text-lg text-white font-medium mb-3">Sistema RAG Pronto</p>
@@ -132,7 +189,7 @@
                                 Faça upload dos seus documentos, escolha o tipo de RAG desejado e comece a consultar seus dados com precisão semântica.
                             </p>
                             <div class="flex gap-2 mt-4 justify-center flex-wrap">
-                                <button onclick="openDocsModal()" class="flex items-center gap-1.5 text-xs bg-rag-blue/15 hover:bg-rag-blue/25 text-rag-blueLight border border-rag-blue/30 rounded-full px-3 py-1.5 transition-all">
+                                <button onclick="openDocsModal()" class="flex items-center gap-1.5 text-xs bg-rag-gray/15 hover:bg-rag-gray/25 text-rag-grayLight border border-rag-gray/30 rounded-full px-3 py-1.5 transition-all">
                                     <i data-lucide="upload" class="w-3 h-3"></i> Enviar Documentos
                                 </button>
                                 <button onclick="openDocsModal()" class="flex items-center gap-1.5 text-xs bg-rag-accent hover:bg-rag-accent/80 text-gray-300 border border-white/5 rounded-full px-3 py-1.5 transition-all">
@@ -150,34 +207,34 @@
 
                     <div class="flex items-center gap-2 px-1 flex-wrap">
                         <div class="flex items-center gap-1.5">
-                            <i data-lucide="zap" class="w-3.5 h-3.5 text-rag-blue flex-shrink-0"></i>
+                            <i data-lucide="zap" class="w-3.5 h-3.5 text-rag-gray flex-shrink-0"></i>
                             <span class="text-xs text-gray-500">Tipo de RAG:</span>
                         </div>
                         <div class="flex gap-1.5 flex-wrap">
                             <button onclick="setRagType('basico', this)" data-rag="basico"
-                                class="rag-type-btn active-rag text-xs px-2.5 py-1 rounded-full border border-rag-blue/50 bg-rag-blue/15 text-rag-blueLight transition-all">
+                                class="rag-type-btn active-rag text-xs px-2.5 py-1 rounded-full border border-rag-gray/50 bg-rag-gray/15 text-rag-grayLight transition-all">
                                 Básico
                             </button>
                             <button onclick="setRagType('hibrido', this)" data-rag="hibrido"
-                                class="rag-type-btn text-xs px-2.5 py-1 rounded-full border border-white/10 bg-rag-accent text-gray-400 hover:text-white hover:border-rag-blue/40 transition-all">
+                                class="rag-type-btn text-xs px-2.5 py-1 rounded-full border border-white/10 bg-rag-accent text-gray-400 hover:text-white hover:border-rag-gray/40 transition-all">
                                 Híbrido
                             </button>
                             <button onclick="setRagType('reranking', this)" data-rag="reranking"
-                                class="rag-type-btn text-xs px-2.5 py-1 rounded-full border border-white/10 bg-rag-accent text-gray-400 hover:text-white hover:border-rag-blue/40 transition-all">
+                                class="rag-type-btn text-xs px-2.5 py-1 rounded-full border border-white/10 bg-rag-accent text-gray-400 hover:text-white hover:border-rag-gray/40 transition-all">
                                 Re-ranking
                             </button>
                             <button onclick="setRagType('multiquery', this)" data-rag="multiquery"
-                                class="rag-type-btn text-xs px-2.5 py-1 rounded-full border border-white/10 bg-rag-accent text-gray-400 hover:text-white hover:border-rag-blue/40 transition-all">
+                                class="rag-type-btn text-xs px-2.5 py-1 rounded-full border border-white/10 bg-rag-accent text-gray-400 hover:text-white hover:border-rag-gray/40 transition-all">
                                 Multi-query
                             </button>
                             <button onclick="setRagType('agentico', this)" data-rag="agentico"
-                                class="rag-type-btn text-xs px-2.5 py-1 rounded-full border border-white/10 bg-rag-accent text-gray-400 hover:text-white hover:border-rag-blue/40 transition-all">
+                                class="rag-type-btn text-xs px-2.5 py-1 rounded-full border border-white/10 bg-rag-accent text-gray-400 hover:text-white hover:border-rag-gray/40 transition-all">
                                 Agêntico
                             </button>
                         </div>
 
                         <div class="ml-auto flex items-center gap-1.5">
-                            <button onclick="openDocsModal()" class="flex items-center gap-1 text-xs text-gray-500 hover:text-rag-blueLight transition-colors">
+                            <button onclick="openDocsModal()" class="flex items-center gap-1 text-xs text-gray-500 hover:text-rag-grayLight transition-colors">
                                 <i data-lucide="paperclip" class="w-3.5 h-3.5"></i>
                                 <span id="docs-count-label">0 docs</span>
                             </button>
@@ -186,13 +243,13 @@
 
                     <form id="chat-form" class="relative group">
                         <div class="absolute inset-0 bg-gradient-to-r from-blue-600/15 to-indigo-500/15 rounded-xl blur opacity-0 group-hover:opacity-100 transition duration-500"></div>
-                        <div class="relative bg-rag-panel rounded-xl overflow-hidden shadow-2xl border border-white/10 focus-within:border-rag-blue/50 transition-colors">
+                        <div class="relative bg-rag-panel rounded-xl overflow-hidden shadow-2xl border border-white/10 focus-within:border-rag-gray/50 transition-colors">
                             <textarea id="user-input" rows="1"
                                 class="w-full bg-transparent text-white p-4 pr-14 outline-none resize-none placeholder-gray-600 custom-scrollbar max-h-40"
                                 placeholder="Faça uma pergunta sobre seus documentos..."
                                 oninput="this.style.height = ''; this.style.height = this.scrollHeight + 'px'"></textarea>
                             <button type="submit" id="send-btn"
-                                class="absolute right-2 bottom-2 p-2 bg-rag-blue text-white rounded-lg hover:bg-rag-blueLight transition-all transform hover:scale-105 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100"
+                                class="absolute right-2 bottom-2 p-2 bg-rag-gray text-white rounded-lg hover:bg-rag-grayLight transition-all transform hover:scale-105 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100"
                                 disabled>
                                 <i data-lucide="send" class="w-5 h-5"></i>
                             </button>
@@ -215,8 +272,8 @@
 
             <div class="flex items-center justify-between mb-5 flex-shrink-0">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-full bg-rag-blue/10 flex items-center justify-center border border-rag-blue/20">
-                        <i data-lucide="files" class="w-5 h-5 text-rag-blue"></i>
+                    <div class="w-10 h-10 rounded-full bg-rag-gray/10 flex items-center justify-center border border-rag-gray/20">
+                        <i data-lucide="files" class="w-5 h-5 text-rag-gray"></i>
                     </div>
                     <div>
                         <h3 class="text-lg font-semibold text-white">Documentos & RAG</h3>
@@ -237,13 +294,13 @@
                     <div id="upload-zone" class="upload-zone" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
                         <input type="file" id="file-input" class="hidden" multiple accept=".zip">
                         <div class="flex flex-col items-center gap-3 pointer-events-none">
-                            <div class="w-12 h-12 rounded-xl bg-rag-blue/10 border border-rag-blue/20 flex items-center justify-center">
-                                <i data-lucide="cloud-upload" class="w-6 h-6 text-rag-blue"></i>
+                            <div class="w-12 h-12 rounded-xl bg-rag-gray/10 border border-rag-gray/20 flex items-center justify-center">
+                                <i data-lucide="cloud-upload" class="w-6 h-6 text-rag-gray"></i>
                             </div>
                             <div>
                                 <p class="text-sm text-gray-300">
                                     Arraste arquivos ou
-                                    <button class="text-rag-blueLight hover:underline pointer-events-auto" onclick="document.getElementById('file-input').click()">clique para selecionar</button>
+                                    <button class="text-rag-grayLight hover:underline pointer-events-auto" onclick="document.getElementById('file-input').click()">clique para selecionar</button>
                                 </p>
                                 <p class="text-xs text-gray-500 mt-1">.ZIP</p>
                             </div>
@@ -258,7 +315,7 @@
                     </label>
                     <div class="space-y-2" id="rag-type-selector">
 
-                        <label class="flex items-start gap-3 p-3 rounded-xl bg-rag-accent border border-rag-blue/30 cursor-pointer hover:bg-rag-accent/80 transition-colors rag-option selected-rag">
+                        <label class="flex items-start gap-3 p-3 rounded-xl bg-rag-accent border border-rag-gray/30 cursor-pointer hover:bg-rag-accent/80 transition-colors rag-option selected-rag">
                             <input type="radio" name="rag_type" value="basico" checked class="mt-0.5 accent-blue-500">
                             <div>
                                 <p class="text-sm font-medium text-white">RAG Básico</p>
@@ -309,12 +366,12 @@
                         <div class="bg-rag-accent/50 rounded-xl p-3 border border-white/5">
                             <label class="text-xs text-gray-400 block mb-1">Tamanho do Chunk</label>
                             <input type="number" id="chunk-size" value="512" min="128" max="2048" step="64"
-                                class="w-full bg-rag-dark/80 text-gray-200 text-sm rounded-lg px-3 py-1.5 outline-none border border-white/10 focus:border-rag-blue/50 transition-colors">
+                                class="w-full bg-rag-dark/80 text-gray-200 text-sm rounded-lg px-3 py-1.5 outline-none border border-white/10 focus:border-rag-gray/50 transition-colors">
                         </div>
                         <div class="bg-rag-accent/50 rounded-xl p-3 border border-white/5">
                             <label class="text-xs text-gray-400 block mb-1">Sobreposição (tokens)</label>
                             <input type="number" id="chunk-overlap" value="64" min="0" max="512" step="16"
-                                class="w-full bg-rag-dark/80 text-gray-200 text-sm rounded-lg px-3 py-1.5 outline-none border border-white/10 focus:border-rag-blue/50 transition-colors">
+                                class="w-full bg-rag-dark/80 text-gray-200 text-sm rounded-lg px-3 py-1.5 outline-none border border-white/10 focus:border-rag-gray/50 transition-colors">
                         </div>
                     </div>
                 </div>
@@ -322,10 +379,10 @@
                 <div class="bg-rag-accent/50 rounded-xl p-4 border border-white/5">
                     <div class="flex items-center justify-between mb-2">
                         <div class="flex items-center gap-2">
-                            <i data-lucide="layers" class="w-4 h-4 text-rag-blue"></i>
+                            <i data-lucide="layers" class="w-4 h-4 text-rag-gray"></i>
                             <label class="text-sm font-medium text-white">Top-K Chunks Recuperados</label>
                         </div>
-                        <span id="topk-value" class="text-rag-blueLight font-semibold text-sm">5</span>
+                        <span id="topk-value" class="text-rag-grayLight font-semibold text-sm">5</span>
                     </div>
                     <input type="range" id="topk-slider" min="1" max="20" value="5"
                         class="w-full accent-blue-500" oninput="document.getElementById('topk-value').textContent = this.value">
@@ -337,7 +394,7 @@
                 <button id="close-docs-btn-2"
                     class="px-4 py-2 rounded-lg text-sm font-medium text-gray-300 bg-rag-accent hover:bg-rag-accent/80 border border-white/5 transition-colors">Cancelar</button>
                 <button onclick="applyDocsConfig()"
-                    class="px-4 py-2 rounded-lg text-sm font-medium text-white bg-rag-blue hover:bg-rag-blueDark transition-colors shadow-lg shadow-blue-600/20 flex items-center gap-2">
+                    class="px-4 py-2 rounded-lg text-sm font-medium text-white bg-rag-gray hover:bg-rag-grayDark transition-colors shadow-lg shadow-blue-600/20 flex items-center gap-2">
                     <i data-lucide="check" class="w-4 h-4"></i>
                     Aplicar Configuração
                 </button>
@@ -371,8 +428,8 @@
             class="relative bg-rag-panel border border-white/10 rounded-2xl shadow-2xl p-6 w-[90%] max-w-md mx-auto transform scale-95 opacity-0 transition-all duration-200">
             <div class="flex items-center justify-between mb-6">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-full bg-rag-blue/10 flex items-center justify-center border border-rag-blue/20">
-                        <i data-lucide="settings" class="w-5 h-5 text-rag-blue"></i>
+                    <div class="w-10 h-10 rounded-full bg-rag-gray/10 flex items-center justify-center border border-rag-gray/20">
+                        <i data-lucide="settings" class="w-5 h-5 text-rag-gray"></i>
                     </div>
                     <h3 class="text-lg font-semibold text-white">Configurações</h3>
                 </div>
@@ -385,14 +442,14 @@
                 <div class="bg-rag-accent/50 rounded-xl p-4 border border-white/5">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-3">
-                            <i data-lucide="palette" class="w-4 h-4 text-rag-blue"></i>
+                            <i data-lucide="palette" class="w-4 h-4 text-rag-gray"></i>
                             <div>
                                 <p class="text-sm font-medium text-white">Tema</p>
                                 <p class="text-xs text-gray-400">Aparência da interface</p>
                             </div>
                         </div>
                         <select id="theme-select"
-                            class="bg-rag-dark border border-white/10 text-gray-200 text-sm rounded-lg px-3 py-1.5 outline-none focus:border-rag-blue/50 transition-colors">
+                            class="bg-rag-dark border border-white/10 text-gray-200 text-sm rounded-lg px-3 py-1.5 outline-none focus:border-rag-gray/50 transition-colors">
                             <option value="dark">Escuro</option>
                             <option value="light">Claro</option>
                         </select>
@@ -400,33 +457,47 @@
                 </div>
 
                 <div class="bg-rag-accent/50 rounded-xl p-4 border border-white/5">
-                    <div class="flex items-center gap-3 mb-2">
-                        <i data-lucide="cpu" class="w-4 h-4 text-rag-blue"></i>
-                        <div>
-                            <p class="text-sm font-medium text-white">Modelo de Embeddings</p>
-                            <p class="text-xs text-gray-400">Configurado via arquivo .env</p>
-                        </div>
+                    <div class="flex items-center gap-3 mb-3">
+                        <i data-lucide="cpu" class="w-4 h-4 text-rag-gray"></i>
+                        <p class="text-sm font-medium text-white">Modelo LLM</p>
                     </div>
-                    <div class="bg-rag-dark/80 rounded-lg px-3 py-2 mt-2">
-                        <code id="ai-model-name" class="text-xs text-rag-blueLight">Carregando...</code>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="text-xs text-gray-400 block mb-1">Provedor</label>
+                            <select id="llm-provider" onchange="updateModels()"
+                                class="w-full bg-rag-dark border border-white/10 text-gray-200 text-sm rounded-lg px-3 py-1.5 outline-none focus:border-rag-gray/50 transition-colors">
+                                <option value="gemini">Google Gemini</option>
+                                <option value="openai">OpenAI</option>
+                                <option value="claude">Anthropic Claude</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-xs text-gray-400 block mb-1">Modelo</label>
+                            <select id="llm-model"
+                                class="w-full bg-rag-dark border border-white/10 text-gray-200 text-sm rounded-lg px-3 py-1.5 outline-none focus:border-rag-gray/50 transition-colors">
+                                <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
+                                <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-xs text-gray-400 block mb-1">API Key (Opcional)</label>
+                            <input type="password" id="llm-api-key" placeholder="Usar padrão do servidor"
+                                class="w-full bg-rag-dark border border-white/10 text-gray-200 text-sm rounded-lg px-3 py-1.5 outline-none focus:border-rag-gray/50 transition-colors">
+                        </div>
                     </div>
                 </div>
 
                 <div class="bg-rag-accent/50 rounded-xl p-4 border border-white/5">
                     <div class="flex items-center gap-3 mb-3">
-                        <i data-lucide="keyboard" class="w-4 h-4 text-rag-blue"></i>
-                        <p class="text-sm font-medium text-white">Atalhos</p>
+                        <i data-lucide="user" class="w-4 h-4 text-rag-gray"></i>
+                        <p class="text-sm font-medium text-white">Conta</p>
                     </div>
-                    <div class="space-y-2 text-xs text-gray-400">
-                        <div class="flex justify-between">
-                            <span>Enviar mensagem</span>
-                            <kbd class="bg-rag-dark px-2 py-0.5 rounded text-gray-300 border border-white/10">Enter</kbd>
-                        </div>
-                        <div class="flex justify-between">
-                            <span>Nova linha</span>
-                            <kbd class="bg-rag-dark px-2 py-0.5 rounded text-gray-300 border border-white/10">Shift+Enter</kbd>
-                        </div>
-                    </div>
+                    <button onclick="logout()" class="w-full text-xs text-red-400 hover:text-red-300 hover:bg-red-900/10 border border-red-500/20 py-2 rounded-lg transition-colors">
+                        Sair da Conta
+                    </button>
+                    <button onclick="saveSettings()" class="w-full text-xs bg-rag-gray hover:bg-rag-grayDark text-white mt-2 py-2 rounded-lg transition-colors">
+                        Salvar Configurações
+                    </button>
                 </div>
 
                 <div class="text-center pt-2 border-t border-white/5">

@@ -1,10 +1,13 @@
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from app.core.config import settings
-from app.api.routes import chat, sessions
+from app.core.database import engine, Base
+from app.api.routes import chat, sessions, auth, users
 import os
+
+# Create DB tables
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -22,6 +25,8 @@ if settings.BACKEND_CORS_ORIGINS:
 
 os.makedirs("frontend/documents", exist_ok=True)
 
+app.include_router(auth.router, prefix=settings.API_V1_STR + "/auth", tags=["auth"])
+app.include_router(users.router, prefix=settings.API_V1_STR + "/users", tags=["users"])
 app.include_router(chat.router, prefix=settings.API_V1_STR + "/chat", tags=["chat"])
 app.include_router(sessions.router, prefix=settings.API_V1_STR + "/sessions", tags=["sessions"])
 

@@ -20,3 +20,9 @@ requests
 python-multipart
 pydantic-settings
 google-genai
+passlib[bcrypt]
+python-jose[cryptography]
+email-validator
+openai
+anthropic
+bcrypt

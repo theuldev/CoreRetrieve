@@ -2,7 +2,6 @@ import os
 from typing import Dict, List, Optional, Union
 import re
 
-# Tentativa de importação de bibliotecas para leitura de documentos
 try:
     from docx import Document
 except ImportError:
@@ -13,7 +12,6 @@ try:
 except ImportError:
     PdfReader = None
 
-# --- ESTADO DA SESSÃO (A "Memória" do Protocolo) ---
 session_states: Dict[str, Dict] = {} 
 
 def get_session_state(session_id: str) -> Dict:
@@ -23,13 +21,11 @@ def get_session_state(session_id: str) -> Dict:
     """
     if session_id not in session_states:
         session_states[session_id] = {
-            # 1. Identidade e Autoridade (Agente Elena)
             "nome_medico": None,
             "especialidade": None,
             "missao_autoridade": None,
             "tempo_experiencia": None,
 
-            # 2. Estrutura da Jornada (Agente Arquiteto)
             "fases": {
                 "fase_1": None, 
                 "fase_2": None, 
@@ -37,19 +33,16 @@ def get_session_state(session_id: str) -> Dict:
             },
             "tempo_total": None, 
 
-            # 3. Gatilhos de Venda (Agente Impacto)
             "prognostico_nao_tratamento": None,
             "dor_paciente": None,
 
-            # 4. Ancoragem Financeira (Agente Estrategista)
             "valor_avulso": None,
             "valor_protocolo": None,
             "bonus_inclusos": [],
             "gatilho_urgencia": None,
             
-            # 5. Identidade Visual (Novo Agente Designer)
             "briefing_visual": {
-                "estilo": "Minimalista", # Padrão
+                "estilo": "Minimalista", 
                 "cores": "Preto e Branco",
                 "formato": "Carrossel"
             },

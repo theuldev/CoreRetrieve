@@ -33,32 +33,197 @@ const openDocsBtn     = document.getElementById('open-docs-btn');
 const closeDocsBtn    = document.getElementById('close-docs-btn');
 const closeDocsBtn2   = document.getElementById('close-docs-btn-2');
 
+// Auth elements
+const authModal       = document.getElementById('auth-modal');
+const mainAppContent  = document.getElementById('main-app-content');
+const loginForm       = document.getElementById('login-form');
+const registerForm    = document.getElementById('register-form');
+
 let sessionId      = null;
 let statusInterval = null;
 let isGenerating   = false;
 let activeRagType  = 'basico';
 let uploadedFiles  = [];
+let currentTheme   = 'dark';
 
 document.addEventListener('DOMContentLoaded', () => {
-    init();
+    initAuth();
     setupSidebar();
     setupDocsModal();
     setupRagTypeSync();
 });
 
-async function init() {
+function getAuthHeaders() {
+    const token = localStorage.getItem('access_token');
+    return token ? { 'Authorization': `Bearer ${token}` } : {};
+}
+
+async function initAuth() {
+    const token = localStorage.getItem('access_token');
+    if (!token) {
+        showAuthModal();
+        return;
+    }
+    
+    try {
+        // Obter settings do usuario (valida token tbm)
+        const res = await fetch(`${API_BASE}/users/me/settings`, {
+            headers: getAuthHeaders()
+        });
+        
+        if (res.ok) {
+            const userSettings = await res.json();
+            applyUserSettings(userSettings);
+            hideAuthModal();
+            initApp();
+        } else {
+            showAuthModal();
+        }
+    } catch {
+        showAuthModal();
+    }
+}
+
+function applyUserSettings(settings) {
+    // Theme
+    if (settings.theme) {
+        themeSelect.value = settings.theme;
+        applyTheme(settings.theme);
+    }
+    // RAG Configs
+    if (settings.rag_config) {
+        const rc = settings.rag_config;
+        if (rc.type) {
+            // Delay para o DOM estar pronto ou forçar o clique se element existir
+            setTimeout(() => {
+                 const btn = document.querySelector(`.rag-type-btn[data-rag="${rc.type}"]`);
+                 if(btn) btn.click();
+            }, 100);
+        }
+        if (rc.chunk_size) document.getElementById('chunk-size').value = rc.chunk_size;
+        if (rc.chunk_overlap) document.getElementById('chunk-overlap').value = rc.chunk_overlap;
+        if (rc.top_k) {
+            document.getElementById('topk-slider').value = rc.top_k;
+            document.getElementById('topk-value').textContent = rc.top_k;
+        }
+    }
+    // Chat Configs (LLM)
+    if (settings.chat_config) {
+        const cc = settings.chat_config;
+        if (cc.provider) document.getElementById('llm-provider').value = cc.provider;
+        setTimeout(updateModels, 0); // Update models based on provider
+        if (cc.model) {
+            setTimeout(() => { document.getElementById('llm-model').value = cc.model; }, 10);
+        }
+        if (cc.api_key) {
+            document.getElementById('llm-api-key').value = cc.api_key;
+        }
+    }
+}
+
+function showAuthModal() {
+    authModal.classList.remove('hidden');
+    mainAppContent.classList.add('blur-md', 'pointer-events-none');
+    
+    loginForm.addEventListener('submit', handleLogin);
+    registerForm.addEventListener('submit', handleRegister);
+}
+
+function hideAuthModal() {
+    authModal.classList.add('hidden');
+    mainAppContent.classList.remove('blur-md', 'pointer-events-none');
+}
+
+function toggleAuthMode() {
+    loginForm.classList.toggle('hidden');
+    registerForm.classList.toggle('hidden');
+    document.getElementById('login-email').value = '';
+    document.getElementById('login-password').value = '';
+    document.getElementById('register-email').value = '';
+    document.getElementById('register-password').value = '';
+}
+
+window.toggleAuthMode = toggleAuthMode;
+
+async function handleLogin(e) {
+    e.preventDefault();
+    const email = document.getElementById('login-email').value;
+    const password = document.getElementById('login-password').value;
+    
+    // OAuth2PasswordRequestForm needs form data URL encoded
+    const formData = new URLSearchParams();
+    formData.append('username', email);
+    formData.append('password', password);
+
+    try {
+        const res = await fetch(`${API_BASE}/auth/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: formData
+        });
+        const data = await res.json();
+        if (res.ok) {
+            localStorage.setItem('access_token', data.access_token);
+            localStorage.setItem('refresh_token', data.refresh_token);
+            showToast('Login realizado com sucesso', 'success');
+            initAuth();
+        } else {
+            showToast(data.detail || 'Falha no login', 'error');
+        }
+    } catch {
+        showToast('Erro de conexao', 'error');
+    }
+}
+
+async function handleRegister(e) {
+    e.preventDefault();
+    const email = document.getElementById('register-email').value;
+    const password = document.getElementById('register-password').value;
+    
+    try {
+        const res = await fetch(`${API_BASE}/auth/register`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+        });
+        const data = await res.json();
+        if (res.ok) {
+            localStorage.setItem('access_token', data.access_token);
+            localStorage.setItem('refresh_token', data.refresh_token);
+            showToast('Conta criada com sucesso', 'success');
+            initAuth();
+        } else {
+            showToast(data.detail || 'Falha no registro', 'error');
+        }
+    } catch {
+        showToast('Erro de conexao', 'error');
+    }
+}
+
+function logout() {
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
+    closeSettings();
+    showAuthModal();
+    // Limpar sessões atuais
+    historyList.innerHTML = '';
+    clearChatUI();
+    sessionId = null;
+}
+window.logout = logout;
+
+async function initApp() {
     await loadSessions();
     setupSettings();
-    loadTheme();
 }
 
 function setRagType(type, btn) {
     activeRagType = type;
     document.querySelectorAll('.rag-type-btn').forEach(b => {
-        b.classList.remove('active-rag', 'border-rag-blue/50', 'bg-rag-blue/15', 'text-rag-blueLight');
+        b.classList.remove('active-rag', 'border-rag-gray/50', 'bg-rag-gray/15', 'text-rag-grayLight');
         b.classList.add('border-white/10', 'bg-rag-accent', 'text-gray-400');
     });
-    btn.classList.add('active-rag', 'border-rag-blue/50', 'bg-rag-blue/15', 'text-rag-blueLight');
+    btn.classList.add('active-rag', 'border-rag-gray/50', 'bg-rag-gray/15', 'text-rag-grayLight');
     btn.classList.remove('border-white/10', 'bg-rag-accent', 'text-gray-400');
     const labels = { basico: 'Básico', hibrido: 'Híbrido', reranking: 'Re-ranking', multiquery: 'Multi-query', agentico: 'Agêntico' };
     document.getElementById('header-rag-type').textContent = labels[type] || type;
@@ -74,10 +239,10 @@ function setupRagTypeSync() {
             const barBtn = document.querySelector(`.rag-type-btn[data-rag="${r.value}"]`);
             if (barBtn) {
                 document.querySelectorAll('.rag-type-btn').forEach(b => {
-                    b.classList.remove('active-rag', 'border-rag-blue/50', 'bg-rag-blue/15', 'text-rag-blueLight');
+                    b.classList.remove('active-rag', 'border-rag-gray/50', 'bg-rag-gray/15', 'text-rag-grayLight');
                     b.classList.add('border-white/10', 'bg-rag-accent', 'text-gray-400');
                 });
-                barBtn.classList.add('active-rag', 'border-rag-blue/50', 'bg-rag-blue/15', 'text-rag-blueLight');
+                barBtn.classList.add('active-rag', 'border-rag-gray/50', 'bg-rag-gray/15', 'text-rag-grayLight');
                 barBtn.classList.remove('border-white/10', 'bg-rag-accent', 'text-gray-400');
             }
             const labels = { basico: 'Básico', hibrido: 'Híbrido', reranking: 'Re-ranking', multiquery: 'Multi-query', agentico: 'Agêntico' };
@@ -90,10 +255,10 @@ function syncRagOptions() {
     document.querySelectorAll('.rag-option').forEach(el => {
         const radio = el.querySelector('input[type="radio"]');
         if (radio && radio.checked) {
-            el.classList.add('selected-rag', 'border-rag-blue/30');
+            el.classList.add('selected-rag', 'border-rag-gray/30');
             el.classList.remove('border-white/5');
         } else {
-            el.classList.remove('selected-rag', 'border-rag-blue/30');
+            el.classList.remove('selected-rag', 'border-rag-gray/30');
             el.classList.add('border-white/5');
         }
     });
@@ -218,7 +383,7 @@ function setupSidebar() {
 
 async function loadSessions() {
     try {
-        const response = await fetch(`${API_BASE}/sessions/`);
+        const response = await fetch(`${API_BASE}/sessions/`, { headers: getAuthHeaders() });
         if (!response.ok) throw new Error('Failed to load sessions');
         const sessions = await response.json();
         renderSessionList(sessions);
@@ -241,7 +406,7 @@ function renderSessionList(sessions) {
     }
     sessions.forEach(session => {
         const div = document.createElement('div');
-        div.className = `p-3 rounded-lg cursor-pointer hover:bg-rag-blue/5 transition-colors group relative flex justify-between items-center ${session.session_id === sessionId ? 'bg-rag-blue/10 border border-rag-blue/20' : ''}`;
+        div.className = `p-3 rounded-lg cursor-pointer hover:bg-rag-gray/5 transition-colors group relative flex justify-between items-center ${session.session_id === sessionId ? 'bg-rag-gray/10 border border-rag-gray/20' : ''}`;
         const dateStr = new Date(session.created_at * 1000).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
         div.innerHTML = `
             <div class="flex-1 min-w-0" onclick="loadChat('${session.session_id}')">
@@ -270,7 +435,7 @@ function startNewSessionUI() {
     sessionId = crypto.randomUUID();
     clearChatUI();
     document.querySelectorAll('#history-list > div').forEach(el => {
-        el.classList.remove('bg-rag-blue/10', 'border', 'border-rag-blue/20');
+        el.classList.remove('bg-rag-gray/10', 'border', 'border-rag-gray/20');
     });
     addWelcomeMessage();
 }
@@ -282,7 +447,7 @@ async function loadChat(id) {
     clearChatUI();
     showTypingIndicator();
     try {
-        const response = await fetch(`${API_BASE}/sessions/${id}/history`);
+        const response = await fetch(`${API_BASE}/sessions/${id}/history`, { headers: getAuthHeaders() });
         if (!response.ok) throw new Error('Failed to load history');
         const messages = await response.json();
         removeTypingIndicator();
@@ -304,7 +469,7 @@ async function deleteSession(id, event) {
     const confirmed = await showConfirmModal('Apagar Sessão', 'Tem certeza que deseja apagar esta sessão? Esta ação não pode ser desfeita.');
     if (!confirmed) return;
     try {
-        await fetch(`${API_BASE}/sessions/${id}`, { method: 'DELETE' });
+        await fetch(`${API_BASE}/sessions/${id}`, { method: 'DELETE', headers: getAuthHeaders() });
         if (sessionId === id) startNewSessionUI();
         showToast('Sessão apagada com sucesso.', 'success');
         loadSessions();
@@ -317,7 +482,7 @@ async function clearAllMemory() {
     const confirmed = await showConfirmModal('Apagar Toda Memória', 'ATENÇÃO: Isso apagará TODAS as sessões e a memória completa. Esta ação é irreversível.');
     if (!confirmed) return;
     try {
-        await fetch(`${API_BASE}/sessions/`, { method: 'DELETE' });
+        await fetch(`${API_BASE}/sessions/`, { method: 'DELETE', headers: getAuthHeaders() });
         startNewSessionUI();
         loadSessions();
         showToast('Toda a memória foi apagada.', 'success');
@@ -356,19 +521,18 @@ chatForm.addEventListener('submit', async (e) => {
     try {
         const response = await fetch(`${API_BASE}/chat/`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+                'Content-Type': 'application/json',
+                ...getAuthHeaders()
+            },
             body: JSON.stringify({
                 message: message,
                 session_id: sessionId,
-                rag_type: activeRagType,
-                chunk_size: parseInt(document.getElementById('chunk-size').value),
-                chunk_overlap: parseInt(document.getElementById('chunk-overlap').value),
-                top_k: parseInt(document.getElementById('topk-slider').value),
                 stream: false
             })
         });
 
-        if (response.status === 403) {
+        if (response.status === 403 || response.status === 401) {
             const data = await response.json();
             stopStatusPolling();
             removeTypingIndicator();
@@ -378,7 +542,10 @@ chatForm.addEventListener('submit', async (e) => {
             return;
         }
 
-        if (!response.ok) throw new Error('Network response was not ok');
+        if (!response.ok) {
+            const data = await response.json();
+            throw new Error(data.detail || 'Falha na comunicação com o servidor');
+        }
 
         const data = await response.json();
         stopStatusPolling();
@@ -392,7 +559,8 @@ chatForm.addEventListener('submit', async (e) => {
         stopStatusPolling();
         removeTypingIndicator();
         removeGeneratingIndicator();
-        addMessage('Ocorreu um erro ao processar sua consulta. Tente novamente.', 'ai', true);
+        showToast(error.message, 'error');
+        console.error('Chat error:', error);
     }
 });
 
@@ -409,7 +577,7 @@ function stopStatusPolling() {
 async function checkStatus() {
     if (!sessionId) return;
     try {
-        const res = await fetch(`${API_BASE}/sessions/${sessionId}/status`);
+        const res = await fetch(`${API_BASE}/sessions/${sessionId}/status`, { headers: getAuthHeaders() });
         if (res.ok) {
             const data = await res.json();
             if (data.status === 'PROCESSANDO' && !isGenerating) {
@@ -427,15 +595,15 @@ function showGeneratingIndicator() {
     div.id = 'generating-indicator-bubble';
     div.className = 'flex gap-4 animate-fade-in group';
     div.innerHTML = `
-        <div class="w-8 h-8 rounded-xl bg-rag-panel flex items-center justify-center flex-shrink-0 mt-1 border border-rag-blue/20">
-            <i data-lucide="database" class="w-4 h-4 text-rag-blue"></i>
+        <div class="w-8 h-8 rounded-xl bg-rag-panel flex items-center justify-center flex-shrink-0 mt-1 border border-rag-gray/20">
+            <i data-lucide="database" class="w-4 h-4 text-rag-gray"></i>
         </div>
-        <div class="px-5 py-4 rounded-2xl shadow-xl border bg-rag-panel border-rag-blue/40 rounded-tl-sm text-gray-200 bg-gradient-to-r from-rag-panel to-rag-blue/5 relative overflow-hidden">
-            <div class="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-rag-blue/10 to-transparent -translate-x-full animate-[shimmer_2s_infinite]"></div>
+        <div class="px-5 py-4 rounded-2xl shadow-xl border bg-rag-panel border-rag-gray/40 rounded-tl-sm text-gray-200 bg-gradient-to-r from-rag-panel to-rag-gray/5 relative overflow-hidden">
+            <div class="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-rag-gray/10 to-transparent -translate-x-full animate-[shimmer_2s_infinite]"></div>
             <div class="flex items-center gap-4 relative z-10">
-                <i data-lucide="loader-2" class="w-5 h-5 text-rag-blue animate-spin"></i>
+                <i data-lucide="loader-2" class="w-5 h-5 text-rag-gray animate-spin"></i>
                 <div class="flex flex-col">
-                    <span class="text-sm font-semibold text-rag-blueLight tracking-wide">Recuperando chunks relevantes...</span>
+                    <span class="text-sm font-semibold text-rag-grayLight tracking-wide">Recuperando chunks relevantes...</span>
                     <span class="text-[11px] text-gray-400 mt-0.5">Pipeline RAG em execução · Tipo: ${activeRagType}</span>
                 </div>
             </div>
@@ -460,8 +628,8 @@ function addWelcomeMessage() {
     div.className = 'flex gap-4 animate-fade-in';
     div.innerHTML = `
         <div class="flex gap-4 animate-fade-in flex-col items-center mb-10 text-center w-full">
-            <div class="w-20 h-20 rounded-2xl bg-rag-blue/10 border border-rag-blue/30 flex items-center justify-center mb-2 shadow-lg shadow-blue-900/20">
-                <i data-lucide="search-code" class="w-10 h-10 text-rag-blue"></i>
+            <div class="w-20 h-20 rounded-2xl bg-rag-gray/10 border border-rag-gray/30 flex items-center justify-center mb-2 shadow-lg shadow-blue-900/20">
+                <i data-lucide="search-code" class="w-10 h-10 text-rag-gray"></i>
             </div>
             <div class="max-w-md bg-rag-panel/60 backdrop-blur-sm p-6 rounded-2xl border border-white/5 shadow-2xl">
                 <p class="text-lg text-white font-medium mb-3">Sistema RAG Pronto</p>
@@ -469,7 +637,7 @@ function addWelcomeMessage() {
                     Faça upload dos seus documentos, escolha o tipo de RAG desejado e comece a consultar seus dados com precisão semântica.
                 </p>
                 <div class="flex gap-2 mt-4 justify-center flex-wrap">
-                    <button onclick="openDocsModal()" class="flex items-center gap-1.5 text-xs bg-rag-blue/15 hover:bg-rag-blue/25 text-rag-blueLight border border-rag-blue/30 rounded-full px-3 py-1.5 transition-all">
+                    <button onclick="openDocsModal()" class="flex items-center gap-1.5 text-xs bg-rag-gray/15 hover:bg-rag-gray/25 text-rag-grayLight border border-rag-gray/30 rounded-full px-3 py-1.5 transition-all">
                         <i data-lucide="upload" class="w-3 h-3"></i> Enviar Documentos
                     </button>
                     <button onclick="openDocsModal()" class="flex items-center gap-1.5 text-xs bg-rag-accent hover:bg-rag-accent/80 text-gray-300 border border-white/5 rounded-full px-3 py-1.5 transition-all">
@@ -488,8 +656,8 @@ function showTypingIndicator() {
     div.id = 'typing-indicator-bubble';
     div.className = 'flex gap-4 animate-fade-in group';
     div.innerHTML = `
-        <div class="w-8 h-8 rounded-xl bg-rag-panel flex items-center justify-center flex-shrink-0 mt-1 border border-rag-blue/20">
-            <i data-lucide="database" class="w-4 h-4 text-rag-blue"></i>
+        <div class="w-8 h-8 rounded-xl bg-rag-panel flex items-center justify-center flex-shrink-0 mt-1 border border-rag-gray/20">
+            <i data-lucide="database" class="w-4 h-4 text-rag-gray"></i>
         </div>
         <div class="px-5 py-3 rounded-2xl shadow-md border bg-rag-panel border-white/5 rounded-tl-sm text-gray-200">
             <div class="flex items-center gap-3">
@@ -518,9 +686,9 @@ function addMessage(text, sender, isError = false) {
     const isAi = sender === 'ai';
 
     const avatar = document.createElement('div');
-    avatar.className = `w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 mt-1 border overflow-hidden ${isAi ? 'bg-rag-panel border-rag-blue/20' : 'bg-rag-accent border-white/10'}`;
+    avatar.className = `w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 mt-1 border overflow-hidden ${isAi ? 'bg-rag-panel border-rag-gray/20' : 'bg-rag-accent border-white/10'}`;
     avatar.innerHTML = isAi
-        ? '<i data-lucide="database" class="w-4 h-4 text-rag-blue"></i>'
+        ? '<i data-lucide="database" class="w-4 h-4 text-rag-gray"></i>'
         : '<i data-lucide="user" class="w-4 h-4 text-gray-300"></i>';
 
     const content = document.createElement('div');
@@ -601,21 +769,71 @@ function setupSettings() {
     settingsOverlay.addEventListener('click', closeSettings);
     themeSelect.addEventListener('change', (e) => {
         applyTheme(e.target.value);
-        localStorage.setItem('rag-theme', e.target.value);
-        showToast('Tema atualizado!', 'success');
     });
-    fetchModelInfo();
 }
 
-async function fetchModelInfo() {
-    try {
-        const res = await fetch('/api/health');
-        const data = await res.json();
-        aiModelName.textContent = data.ai_model || 'Não disponível';
-    } catch {
-        aiModelName.textContent = 'Configurado via .env';
+function updateModels() {
+    const provider = document.getElementById('llm-provider').value;
+    const modelSelect = document.getElementById('llm-model');
+    modelSelect.innerHTML = '';
+    
+    if (provider === 'gemini') {
+        modelSelect.innerHTML = `
+            <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
+            <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
+            <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
+        `;
+    } else if (provider === 'openai') {
+        modelSelect.innerHTML = `
+            <option value="gpt-4o">GPT-4o</option>
+            <option value="gpt-4o-mini">GPT-4o Mini</option>
+            <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+        `;
+    } else if (provider === 'claude') {
+        modelSelect.innerHTML = `
+            <option value="claude-3-5-sonnet-20241022">Claude 3.5 Sonnet</option>
+            <option value="claude-3-opus-20240229">Claude 3 Opus</option>
+            <option value="claude-3-haiku-20240307">Claude 3 Haiku</option>
+        `;
     }
 }
+window.updateModels = updateModels;
+
+async function saveSettings() {
+    const theme = themeSelect.value;
+    const rag_config = {
+        type: activeRagType,
+        chunk_size: parseInt(document.getElementById('chunk-size').value),
+        chunk_overlap: parseInt(document.getElementById('chunk-overlap').value),
+        top_k: parseInt(document.getElementById('topk-slider').value)
+    };
+    const chat_config = {
+        provider: document.getElementById('llm-provider').value,
+        model: document.getElementById('llm-model').value,
+        api_key: document.getElementById('llm-api-key').value
+    };
+    
+    try {
+        const res = await fetch(`${API_BASE}/users/me/settings`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                ...getAuthHeaders()
+            },
+            body: JSON.stringify({ theme, rag_config, chat_config })
+        });
+        
+        if (res.ok) {
+            showToast('Configurações salvas no servidor', 'success');
+            closeSettings();
+        } else {
+            showToast('Erro ao salvar no servidor', 'error');
+        }
+    } catch {
+        showToast('Erro de conexao', 'error');
+    }
+}
+window.saveSettings = saveSettings;
 
 function openSettings() {
     settingsModal.classList.remove('hidden');
@@ -637,9 +855,7 @@ function closeSettings() {
 }
 
 function loadTheme() {
-    const saved = localStorage.getItem('rag-theme') || 'dark';
-    themeSelect.value = saved;
-    applyTheme(saved);
+    // Theme loading delegaod ao profile setting na API no momento do login
 }
 
 function applyTheme(theme) {

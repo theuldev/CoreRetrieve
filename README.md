@@ -1,77 +1,66 @@
-# CoreRetrieve | Motor de Busca Semântica & RAG
+# CoreRetrieve | Motor de Busca Semântica & RAG (Docker & PgVector)
 
-O **CoreRetrieve** é uma plataforma de Recuperação Aumentada com Geração (RAG), projetada para permitir a consulta semântica e inteligente de documentos. O sistema suporta múltiplos pipelines de RAG (desde o básico até agentes autônomos) e integra-se com os principais provedores de LLM.
+O **CoreRetrieve** é uma plataforma de Recuperação Aumentada com Geração (RAG) de alta performance, projetada para permitir a consulta semântica e inteligente de documentos. Esta versão foi migrada para uma arquitetura puramente baseada em **PostgreSQL** com a extensão **PgVector**, garantindo escalabilidade e robustez.
 
 ## 🚀 Funcionalidades
 
-- **Múltiplos Modos de RAG**:
-  - **Básico**: Busca por similaridade de embeddings.
-  - **Híbrido**: Combinação de busca vetorial (semântica) e léxica (BM25).
-  - **Re-ranking**: Recuperação inicial seguida de re-ordenação por relevância.
-  - **Multi-query**: Geração de variações da pergunta para ampliar a cobertura semântica.
-  - **Agêntico**: O modelo decide autonomamente as melhores estratégias de busca.
-- **Gerenciamento de Documentos**: Upload de arquivos (suporte a .ZIP) e processamento automático.
-- **Configuração Flexível**: Ajuste de tamanho de chunks, overlap e Top-K recuperados.
-- **Suporte Multi-LLM**: Integração com Google Gemini, OpenAI e Anthropic Claude.
-- **Interface Moderna**: UI responsiva com modo escuro, histórico de conversas e gerenciamento de memórias.
+- **RAG Nativo com PgVector**: Implementação otimizada de busca vetorial utilizando o operador de distância de cosseno `<=>` do PostgreSQL.
+- **Red/Black Theme**: Interface moderna e premium com paleta de cores em vermelho vibrante e modo escuro em preto absoluto.
+- **Configuração de RAG Otimizada**: Processamento de documentos com `chunk_overlap: 0` para máxima clareza na recuperação.
+- **Mandatory User API Keys**: Segurança aprimorada onde cada usuário fornece sua própria chave de API (Gemini, OpenAI, Anthropic) diretamente nas configurações da aplicação.
+- **Containerização Total**: Dockerizado para fácil deploy e consistência em qualquer ambiente.
+- **Suporte Multi-Documento**: Extração inteligente de textos de PDFs, DOCX, TXT e MD.
 
 ## 🛠️ Stack Tecnológica
 
-- **Backend**: Python 3.12, FastAPI, SQLAlchemy (SQLite), Agno Framework.
-- **Frontend**: HTML5, Tailwind CSS, JavaScript Vanilla, Lucide Icons, Marked.js.
-- **IA/LLM**: Google Generative AI (Gemini), OpenAI, Anthropic.
+- **Backend**: Python 3.12, FastAPI, SQLAlchemy, PostgreSQL + PgVector, Agno Framework.
+- **Frontend**: HTML5, Vanilla JS, Lucide Icons, Marked.js.
+- **IA/LLM**: Google Generative AI (Gemini), OpenAI, Anthropic (via Agno).
+- **Infraestrutura**: Docker & Docker Compose.
 
 ## 📦 Estrutura do Projeto
 
 - `app/`: Lógica do backend (API, rotas, modelos e serviços).
-- `frontend/`: Interface do usuário e arquivos estáticos.
-- `data/`: Armazenamento do banco de dados SQLite.
-- `venv/`: Ambiente virtual Python (ignorado pelo Git).
-- `.env`: Configuração de variáveis de ambiente e chaves de API.
+- `frontend/`: Interface do usuário, CSS (Red/Black) e JS (Relative API paths).
+- `Dockerfile` & `docker-compose.yml`: Configurações de containerização.
+- `requirements.txt`: Dependências otimizadas (removidas bibliotecas não utilizadas).
 
-## ⚙️ Instalação e Execução
+## ⚙️ Instalação e Execução (Docker - Recomendado)
 
 ### 1. Pré-requisitos
-- Python 3.12+ instalado.
+- Docker e Docker Compose instalados.
 
-### 2. Configuração do Ambiente
-Clone o repositório e acesse a pasta:
+### 2. Executando a Aplicação
+Clone o repositório e inicie os serviços:
 ```bash
-cd CoreRetrieve
+docker compose up --build
 ```
+Isso iniciará:
+1. O banco de dados **Postgres** na porta `5432`.
+2. A aplicação **FastAPI** na porta `8000`.
 
-Crie e ative o ambiente virtual:
-```bash
-# Windows
-python -m venv venv
-.\venv\Scripts\activate
-
-# Linux/Mac
-python -m venv venv
-source venv/bin/activate
-```
-
-Instale as dependências:
-```bash
-pip install -r requirements.txt
-```
-
-### 3. Variáveis de Ambiente
-Crie um arquivo `.env` na raiz do projeto com suas chaves de API:
-```env
-GOOGLE_API_KEY=sua_chave_aqui
-AI_MODEL_NAME=gemini-2.0-flash
-```
-
-### 4. Executando a Aplicação
-Inicie o servidor FastAPI:
-```bash
-uvicorn app.main:app --reload
-```
 A aplicação estará disponível em `http://localhost:8000`.
 
+### 3. Controle do Banco de Dados (pgAdmin)
+O **pgAdmin 4** também está disponível para gerenciar o banco de dados via interface gráfica:
+- **URL**: `http://localhost:5050`
+- **Email**: `admin@admin.com`
+- **Senha**: `admin`
+
+Para conectar ao banco via pgAdmin, use o host `db` na porta `5432`.
+
+## 🔑 Configuração de API Keys
+Ao iniciar pela primeira vez:
+1. Faça login na aplicação.
+2. Acesse o menu de **Configurações**.
+3. Insira sua chave de API (Gemini, OpenAI ou Anthropic).
+4. A partir desse momento, você poderá fazer upload de arquivos e iniciar chats inteligentes.
+
+> [!IMPORTANT]
+> A aplicação não possui chaves de API padrão. É obrigatório que o usuário forneça sua própria chave para processamento de RAG e Chat.
+
 ## 🔒 Segurança e Privacidade
-O sistema implementa autenticação local e armazena os dados de sessão no banco de dados SQLite local. Documentos carregados permanecem no servidor local e as chaves de API são gerenciadas via variáveis de ambiente.
+O sistema utiliza PostgreSQL para armazenamento persistente e seguro. Todas as chaves de API e documentos permanecem sob controle do usuário no ambiente de execução.
 
 ---
-*Desenvolvido como um motor de busca semântica nativo, sem dependências de frameworks pesados de orquestração externa.*
+*Desenvolvido como um motor de busca semântica nativo e agêntico, otimizado para produção.*

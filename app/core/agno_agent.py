@@ -1,5 +1,5 @@
 from agno.agent import Agent
-from agno.db.sqlite import SqliteDb
+from agno.db.postgres import PostgresDb
 from app.core.config import settings
 
 import logging
@@ -9,8 +9,10 @@ import os
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-os.makedirs("data", exist_ok=True)
-db = SqliteDb(db_file="data/agno_sessions.db")
+# Using PostgreSQL for session storage
+db = None
+if settings.DATABASE_URL:
+    db = PostgresDb(session_table="agno_sessions", db_url=settings.DATABASE_URL)
 
 def get_llm_model(provider: str, model_id: str, api_key: str = None):
     """Instantiates the correct Agno model class based on provider and model ID."""
@@ -38,7 +40,7 @@ def get_agno_agent(session_id: str = None, provider: str = "gemini", model: str 
     return Agent(
         name="CoreRetrieve Assistant",
         model=llm,
-        db=db,
+        db=db if db else None,
         add_history_to_context=True,
         num_history_runs=30,
         instructions=dedent("""\

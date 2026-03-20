@@ -14,7 +14,7 @@ class User(Base):
     rag_config = Column(JSON, default=lambda: {
         "type": "basico",
         "chunk_size": 512,
-        "chunk_overlap": 64,
+        "chunk_overlap": 0,
         "top_k": 5
     })
     
@@ -23,3 +23,13 @@ class User(Base):
         "model": "gemini-2.0-flash",
         "api_key": ""
     })
+
+class File(Base):
+    __tablename__ = "files"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, nullable=False)
+    size = Column(Integer, nullable=False)
+    type = Column(String, nullable=False)
+    created_at = Column(Integer, nullable=False)
+    user_id = Column(String, index=True, nullable=False)

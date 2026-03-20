@@ -23,3 +23,7 @@ Thumbs.db
 # Logs
 *.log
 out.log
+
+# Data
+data/app.db
+data/agno_sessions.db

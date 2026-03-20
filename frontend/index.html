@@ -1,514 +1,776 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
-
+<html class="light" lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CoreRetrieve | Motor de Busca Semântica</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: { sans: ['Outfit', 'sans-serif'] },
-                    colors: {
-                        rag: {
-                            gray: '#a1a1aa',
-                            grayDark: '#52525b',
-                            grayLight: '#d4d4d8',
-                            dark: '#000000',
-                            panel: '#09090b',
-                            accent: '#18181b',
-                            text: '#fafafa'
-                        }
-                    }
-                }
-            }
-        }
-    </script>
-    <link rel="stylesheet" href="css/style.css">
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>CoreRetrieve | Intelligent Layer</title>
+  <meta name="description" content="Plataforma RAG inteligente para consulta semântica de documentos com múltiplos pipelines de IA."/>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "on-tertiary-fixed-variant": "#2a0000",
+            "error": "#dc2626",
+            "primary-dim": "#991b1b",
+            "surface-container-highest": "#f0f0f0",
+            "error-container": "#fee2e2",
+            "inverse-on-surface": "#9ca3af",
+            "error-dim": "#450a0a",
+            "on-secondary-container": "#4b5563",
+            "tertiary-fixed-dim": "#991b1b",
+            "surface-variant": "#f3f4f6",
+            "tertiary-fixed": "#dc2626",
+            "primary-fixed": "#fee2e2",
+            "inverse-surface": "#000000",
+            "outline-variant": "#e5e7eb",
+            "secondary-dim": "#4b5563",
+            "surface-container-lowest": "#ffffff",
+            "secondary-fixed": "#f3f4f6",
+            "on-tertiary": "#ffffff",
+            "on-primary-fixed": "#450a0a",
+            "tertiary": "#dc2626",
+            "surface-tint": "#dc2626",
+            "on-error": "#ffffff",
+            "surface-bright": "#ffffff",
+            "surface-dim": "#f3f4f6",
+            "surface": "#ffffff",
+            "surface-container-low": "#fafafa",
+            "primary": "#dc2626",
+            "surface-container-high": "#f5f5f5",
+            "on-secondary-fixed-variant": "#374151",
+            "tertiary-container": "#dc2626",
+            "secondary-container": "#f3f4f6",
+            "background": "#ffffff",
+            "on-tertiary-container": "#ffffff",
+            "on-error-container": "#450a0a",
+            "secondary": "#4b5563",
+            "on-secondary-fixed": "#111827",
+            "on-tertiary-fixed": "#ffffff",
+            "outline": "#9ca3af",
+            "on-primary-container": "#ffffff",
+            "on-secondary": "#ffffff",
+            "primary-container": "#dc2626",
+            "on-background": "#000000",
+            "surface-container": "#f9fafb",
+            "primary-fixed-dim": "#fca5a5",
+            "on-surface-variant": "#4b5563",
+            "secondary-fixed-dim": "#9ca3af",
+            "on-primary-fixed-variant": "#7f1d1d",
+            "tertiary-dim": "#991b1b",
+            "on-surface": "#000000",
+            "on-primary": "#ffffff",
+            "inverse-primary": "#fca5a5"
+          },
+          fontFamily: {
+            "headline": ["Manrope", "sans-serif"],
+            "body": ["Inter", "sans-serif"],
+            "label": ["Inter", "sans-serif"]
+          },
+          borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+        },
+      },
+    }
+  </script>
+  <link rel="stylesheet" href="css/style.css"/>
 </head>
+<body class="bg-surface text-on-surface font-body antialiased">
 
-<body class="bg-rag-dark text-rag-text h-screen overflow-hidden font-sans">
+<!-- AUTH OVERLAY -->
+<div id="auth-overlay" class="fixed inset-0 z-[200] flex items-center justify-center bg-surface/95 backdrop-blur-sm">
+  <div class="w-full max-w-md bg-surface-container-lowest border border-outline-variant/20 rounded-xl shadow-2xl p-8">
+    <div class="flex items-center gap-3 mb-8">
+      <div class="w-10 h-10 bg-gradient-to-br from-primary to-primary-dim rounded-xl flex items-center justify-center text-on-primary shadow-sm">
+        <span class="material-symbols-outlined text-lg">auto_awesome</span>
+      </div>
+      <div>
+        <h1 class="text-xl font-headline font-bold text-on-surface">CoreRetrieve</h1>
+        <p class="text-[10px] uppercase tracking-widest text-on-surface-variant opacity-60">Intelligent Layer</p>
+      </div>
+    </div>
 
-    <!-- LOGIN / REGISTER OVERLAY -->
-    <div id="auth-modal" class="fixed inset-0 z-[200] flex items-center justify-center bg-rag-dark">
-        <div class="relative w-full max-w-md bg-rag-panel border border-white/10 rounded-2xl shadow-2xl p-8 transform transition-all duration-300">
-            <div class="flex items-center justify-center gap-3 mb-8">
-                <div class="w-12 h-12 rounded-xl bg-rag-panel border border-rag-gray/30 flex items-center justify-center shadow-lg">
-                    <i data-lucide="brain-circuit" class="w-6 h-6 text-rag-gray"></i>
+    <!-- Login Form -->
+    <form id="login-form" class="space-y-4">
+      <div>
+        <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1">Email</label>
+        <input type="email" id="login-email" required class="w-full bg-surface-container-low border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-tertiary/20 outline-none"/>
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1">Senha</label>
+        <input type="password" id="login-password" required class="w-full bg-surface-container-low border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-tertiary/20 outline-none"/>
+      </div>
+      <button type="submit" class="w-full py-3 rounded-xl font-headline font-bold text-on-primary bg-gradient-to-br from-primary to-primary-dim hover:opacity-90 transition-all shadow-sm mt-2">Entrar</button>
+      <p class="text-center text-sm text-on-surface-variant mt-2">Não tem conta? <button type="button" id="toggle-auth-btn" class="text-tertiary font-semibold hover:underline">Registrar-se</button></p>
+    </form>
+
+    <!-- Register Form -->
+    <form id="register-form" class="space-y-4 hidden">
+      <div>
+        <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1">Email</label>
+        <input type="email" id="register-email" required class="w-full bg-surface-container-low border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-tertiary/20 outline-none"/>
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1">Senha</label>
+        <input type="password" id="register-password" required class="w-full bg-surface-container-low border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-tertiary/20 outline-none"/>
+      </div>
+      <button type="submit" class="w-full py-3 rounded-xl font-headline font-bold text-on-primary bg-gradient-to-br from-primary to-primary-dim hover:opacity-90 transition-all shadow-sm mt-2">Criar Conta</button>
+      <p class="text-center text-sm text-on-surface-variant mt-2">Já tem conta? <button type="button" id="toggle-auth-btn-2" class="text-tertiary font-semibold hover:underline">Fazer Login</button></p>
+    </form>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="main-app" class="flex h-screen overflow-hidden hidden">
+
+  <!-- SIDEBAR -->
+  <aside id="sidebar" class="hidden md:flex flex-col h-full w-64 bg-surface border-r border-outline-variant/10 font-headline text-sm font-medium shrink-0 sticky top-0">
+    <div class="p-6">
+      <div class="flex items-center gap-3 mb-1">
+        <div class="w-8 h-8 bg-gradient-to-br from-primary to-primary-dim rounded-lg flex items-center justify-center text-on-primary shadow-sm">
+          <span class="material-symbols-outlined text-sm">auto_awesome</span>
+        </div>
+        <span class="text-lg font-bold text-on-surface">Intelligent Layer</span>
+      </div>
+      <p class="text-[10px] uppercase tracking-widest text-on-surface-variant opacity-60 pl-11">CoreRetrieve</p>
+    </div>
+
+    <nav id="sidebar-nav" class="flex-1 px-4 space-y-1 mt-2">
+      <a href="#" data-view="dashboard" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container-low transition-colors">
+        <span class="material-symbols-outlined">dashboard</span><span>Dashboard</span>
+      </a>
+      <a href="#" data-view="upload" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container-low transition-colors">
+        <span class="material-symbols-outlined">cloud_upload</span><span>Upload</span>
+      </a>
+      <a href="#" data-view="chat" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container-low transition-colors">
+        <span class="material-symbols-outlined">forum</span><span>Chat</span>
+      </a>
+      <a href="#" data-view="settings" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container-low transition-colors">
+        <span class="material-symbols-outlined">settings</span><span>Settings</span>
+      </a>
+      <a href="#" data-view="history" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container-low transition-colors">
+        <span class="material-symbols-outlined">history</span><span>History</span>
+      </a>
+    </nav>
+
+    <div class="p-4 space-y-4">
+      <button id="new-analysis-btn" class="w-full flex items-center justify-center gap-2 bg-gradient-to-br from-primary to-primary-dim text-on-primary py-3 px-4 rounded-xl shadow-sm hover:opacity-90 transition-all font-semibold text-sm">
+        <span class="material-symbols-outlined text-sm">add</span><span>New Analysis</span>
+      </button>
+      <div class="flex items-center gap-3 px-2 py-2 border-t border-outline-variant/10">
+        <div id="sidebar-avatar" class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface-variant">
+          <span class="material-symbols-outlined text-sm">person</span>
+        </div>
+        <div class="overflow-hidden">
+          <p id="sidebar-email" class="text-xs font-bold truncate text-on-surface">Usuário</p>
+          <p class="text-[10px] text-on-surface-variant">Pro Plan</p>
+        </div>
+        <button id="logout-btn" class="ml-auto text-on-surface-variant hover:text-error transition-colors" title="Sair">
+          <span class="material-symbols-outlined text-lg">logout</span>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <div class="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
+
+    <!-- TOP HEADER -->
+    <header class="w-full h-16 sticky top-0 z-50 bg-surface/70 backdrop-blur-md border-b border-outline-variant/10 shadow-sm flex items-center justify-between px-4 md:px-6 shrink-0">
+      <div class="flex items-center gap-3 flex-1">
+        <!-- Mobile hamburger -->
+        <button id="mob-menu-btn" class="md:hidden text-on-surface-variant hover:text-on-surface">
+          <span class="material-symbols-outlined">menu</span>
+        </button>
+        <div class="relative max-w-md w-full">
+          <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-xl">search</span>
+          <input id="global-search" type="text" placeholder="Pesquisar documentos ou chats..." class="w-full bg-surface-container-low border-none rounded-xl pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-tertiary/20 outline-none"/>
+        </div>
+      </div>
+      <div class="flex items-center gap-4">
+        <button id="darkmode-btn" title="Alternar tema" class="text-on-surface-variant hover:text-tertiary transition-colors">
+          <span class="material-symbols-outlined">dark_mode</span>
+        </button>
+        <button id="notif-btn" class="text-on-surface-variant hover:text-tertiary transition-colors relative">
+          <span class="material-symbols-outlined">notifications</span>
+          <span class="absolute top-0 right-0 w-2 h-2 bg-tertiary rounded-full border-2 border-white"></span>
+        </button>
+        <button class="text-on-surface-variant hover:text-on-surface transition-colors">
+          <span class="material-symbols-outlined">account_circle</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- VIEW CONTAINER -->
+    <div class="flex-1 overflow-hidden relative">
+
+      <!-- ===== DASHBOARD VIEW ===== -->
+      <section id="view-dashboard" class="view-panel h-full overflow-y-auto p-6 md:p-8">
+        <div class="max-w-7xl mx-auto w-full space-y-8">
+          <div>
+            <h2 class="text-3xl font-headline font-extrabold text-on-surface tracking-tight mb-1">Visão Geral</h2>
+            <p class="text-on-surface-variant">Bem-vindo de volta. Aqui está o desempenho da sua infraestrutura RAG hoje.</p>
+          </div>
+
+          <!-- KPI Cards -->
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-5">
+            <div class="bg-surface-container-lowest p-6 rounded-xl shadow-sm flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between mb-4">
+                  <span class="p-2 bg-primary-container rounded-lg"><span class="material-symbols-outlined text-primary">query_stats</span></span>
+                  <span class="text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded-full">+12%</span>
                 </div>
-                <div>
-                    <h1 class="text-2xl font-bold tracking-wide text-white">CoreRetrieve</h1>
-                    <p class="text-xs text-rag-grayLight font-medium tracking-wider uppercase">Authentication</p>
+                <p class="text-on-surface-variant text-sm font-medium">Consultas Totais</p>
+                <h3 id="stat-queries" class="text-2xl font-bold mt-1">—</h3>
+              </div>
+              <div class="mt-4 h-1 w-full bg-surface-container rounded-full overflow-hidden">
+                <div class="h-full bg-primary w-3/4 rounded-full"></div>
+              </div>
+            </div>
+            <div class="bg-surface-container-lowest p-6 rounded-xl shadow-sm flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between mb-4">
+                  <span class="p-2 bg-secondary-container rounded-lg"><span class="material-symbols-outlined text-secondary">description</span></span>
+                  <span class="text-xs font-bold text-on-surface-variant bg-surface-container-low px-2 py-1 rounded-full">Estável</span>
                 </div>
+                <p class="text-on-surface-variant text-sm font-medium">Documentos Indexados</p>
+                <h3 id="stat-docs" class="text-2xl font-bold mt-1">—</h3>
+              </div>
+              <p class="text-[10px] text-on-surface-variant mt-4">Base de conhecimento ativa</p>
+            </div>
+            <div class="bg-surface-container-lowest p-6 rounded-xl shadow-sm flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between mb-4">
+                  <span class="p-2 bg-tertiary-container/10 rounded-lg"><span class="material-symbols-outlined text-tertiary">token</span></span>
+                  <span class="text-xs font-bold text-error bg-error/10 px-2 py-1 rounded-full">-5%</span>
+                </div>
+                <p class="text-on-surface-variant text-sm font-medium">Sessões de Chat</p>
+                <h3 id="stat-sessions" class="text-2xl font-bold mt-1">—</h3>
+              </div>
+              <p class="text-[10px] text-on-surface-variant mt-4">Histórico de conversas</p>
+            </div>
+            <div class="bg-gradient-to-br from-primary to-primary-dim p-6 rounded-xl text-on-primary flex flex-col justify-between shadow-lg">
+              <div>
+                <span class="material-symbols-outlined text-3xl mb-2">auto_awesome</span>
+                <h4 class="text-lg font-bold leading-tight">Otimize seu Contexto</h4>
+                <p class="text-xs text-on-primary/80 mt-2">Configure o pipeline RAG para a máxima precisão semântica.</p>
+              </div>
+              <button onclick="switchView('settings')" class="mt-4 text-xs font-bold bg-white/20 hover:bg-white/30 transition-colors py-2 px-4 rounded-lg backdrop-blur-sm self-start">
+                Configurar agora
+              </button>
+            </div>
+          </div>
+
+          <!-- Main grid -->
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Sessions list -->
+            <div class="lg:col-span-2 space-y-6">
+              <div class="bg-surface-container-lowest p-8 rounded-xl shadow-sm">
+                <div class="flex items-center justify-between mb-6">
+                  <h3 class="text-xl font-bold tracking-tight">Sessões Recentes</h3>
+                  <button onclick="switchView('history')" class="text-primary text-sm font-bold flex items-center gap-1 hover:underline">
+                    Ver todas <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                  </button>
+                </div>
+                <div id="dash-sessions-list" class="space-y-3">
+                  <div class="text-sm text-on-surface-variant italic">Carregando...</div>
+                </div>
+              </div>
+
+              <!-- Weekly bar chart -->
+              <div class="bg-surface-container-lowest p-8 rounded-xl shadow-sm h-64 flex flex-col">
+                <div class="flex items-center justify-between mb-4">
+                  <h3 class="text-lg font-bold">Atividade Semanal</h3>
+                  <div class="flex items-center gap-4 text-[10px] font-bold uppercase tracking-wider">
+                    <div class="flex items-center gap-1.5"><span class="w-3 h-3 bg-primary rounded-full"></span> Consultas</div>
+                    <div class="flex items-center gap-1.5"><span class="w-3 h-3 bg-tertiary-fixed rounded-full"></span> Sessões</div>
+                  </div>
+                </div>
+                <div class="flex-1 flex items-end justify-between gap-2 px-2">
+                  <div class="w-full bg-surface-container-low rounded-t-lg h-[40%]"></div>
+                  <div class="w-full bg-surface-container-low rounded-t-lg h-[65%]"></div>
+                  <div class="w-full bg-primary rounded-t-lg h-[85%]"></div>
+                  <div class="w-full bg-surface-container-low rounded-t-lg h-[55%]"></div>
+                  <div class="w-full bg-primary rounded-t-lg h-[95%]"></div>
+                  <div class="w-full bg-surface-container-low rounded-t-lg h-[70%]"></div>
+                  <div class="w-full bg-surface-container-low rounded-t-lg h-[45%]"></div>
+                </div>
+                <div class="flex justify-between mt-3 text-[10px] text-on-surface-variant font-bold">
+                  <span>SEG</span><span>TER</span><span>QUA</span><span>QUI</span><span>SEX</span><span>SÁB</span><span>DOM</span>
+                </div>
+              </div>
             </div>
 
-            <!-- Login Form -->
-            <form id="login-form" class="space-y-5">
-                <div>
-                    <label class="block text-sm font-medium text-gray-400 mb-1">Email</label>
-                    <input type="email" id="login-email" required
-                        class="w-full bg-rag-dark border border-white/10 text-white rounded-lg px-4 py-2.5 outline-none focus:border-rag-gray/50 transition-colors">
+            <!-- Right column -->
+            <div class="lg:col-span-1 space-y-6">
+              <div class="bg-surface-container-lowest p-8 rounded-xl shadow-sm border border-outline-variant/10">
+                <div class="flex items-center justify-between mb-6">
+                  <h3 class="text-xl font-bold tracking-tight">Agentes Ativos</h3>
+                  <button onclick="switchView('chat')" class="p-2 hover:bg-surface-container-low rounded-full transition-colors">
+                    <span class="material-symbols-outlined text-sm">add_circle</span>
+                  </button>
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-400 mb-1">Senha</label>
-                    <input type="password" id="login-password" required
-                        class="w-full bg-rag-dark border border-white/10 text-white rounded-lg px-4 py-2.5 outline-none focus:border-rag-gray/50 transition-colors">
+                <div class="space-y-4">
+                  <div class="flex items-start gap-4 p-4 rounded-xl bg-surface-container-low/50 border border-transparent hover:border-primary/20 transition-all">
+                    <div class="w-12 h-12 rounded-full bg-tertiary-fixed/20 flex items-center justify-center shrink-0">
+                      <span class="material-symbols-outlined text-tertiary" style="font-variation-settings:'FILL' 1">smart_toy</span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <div class="flex items-center justify-between">
+                        <p class="font-bold text-sm">Assistente RAG</p>
+                        <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+                      </div>
+                      <p class="text-[11px] text-on-surface-variant mt-1">Pipeline: Básico + Indexação</p>
+                    </div>
+                  </div>
+                  <div class="flex items-start gap-4 p-4 rounded-xl bg-surface-container-low/50 border border-transparent hover:border-primary/20 transition-all">
+                    <div class="w-12 h-12 rounded-full bg-primary-container/20 flex items-center justify-center shrink-0">
+                      <span class="material-symbols-outlined text-primary" style="font-variation-settings:'FILL' 1">support_agent</span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <div class="flex items-center justify-between">
+                        <p class="font-bold text-sm">Analisador Semântico</p>
+                        <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+                      </div>
+                      <p class="text-[11px] text-on-surface-variant mt-1">Pipeline: Híbrido + Re-ranking</p>
+                    </div>
+                  </div>
                 </div>
-                <button type="submit"
-                    class="w-full py-3 rounded-lg font-medium text-white bg-rag-gray hover:bg-rag-grayDark transition-colors shadow-lg shadow-blue-600/20">
-                    Entrar
+                <button onclick="switchView('chat')" class="w-full mt-6 py-3 bg-surface-container-high hover:bg-surface-container-highest transition-colors rounded-xl text-sm font-bold text-on-surface">
+                  Iniciar Nova Análise
                 </button>
-                <p class="text-center text-sm text-gray-500 mt-4">
-                    Não tem uma conta? <button type="button" onclick="toggleAuthMode()" class="text-rag-grayLight hover:underline">Registrar-se</button>
-                </p>
-            </form>
+              </div>
 
-            <!-- Register Form (Hidden by default) -->
-            <form id="register-form" class="space-y-5 hidden">
-                <div>
-                    <label class="block text-sm font-medium text-gray-400 mb-1">Email</label>
-                    <input type="email" id="register-email" required
-                        class="w-full bg-rag-dark border border-white/10 text-white rounded-lg px-4 py-2.5 outline-none focus:border-rag-gray/50 transition-colors">
+              <!-- System status -->
+              <div class="bg-surface-container-low p-6 rounded-xl">
+                <h4 class="text-sm font-bold mb-4 flex items-center gap-2">
+                  <span class="w-2 h-2 bg-green-500 rounded-full"></span> Status do Sistema
+                </h4>
+                <div class="space-y-3">
+                  <div class="flex justify-between text-[11px]"><span class="text-on-surface-variant">API Backend</span><span class="font-bold text-green-600">Online</span></div>
+                  <div class="flex justify-between text-[11px]"><span class="text-on-surface-variant">Banco de Dados</span><span class="font-bold">SQLite Local</span></div>
+                  <div class="flex justify-between text-[11px]"><span class="text-on-surface-variant">Modelo IA</span><span id="stat-model" class="font-bold truncate max-w-[120px]">—</span></div>
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-400 mb-1">Senha</label>
-                    <input type="password" id="register-password" required
-                        class="w-full bg-rag-dark border border-white/10 text-white rounded-lg px-4 py-2.5 outline-none focus:border-rag-gray/50 transition-colors">
-                </div>
-                <button type="submit"
-                    class="w-full py-3 rounded-lg font-medium text-white bg-rag-gray hover:bg-rag-grayDark transition-colors shadow-lg shadow-blue-600/20">
-                    Criar Conta
-                </button>
-                <p class="text-center text-sm text-gray-500 mt-4">
-                    Já tem uma conta? <button type="button" onclick="toggleAuthMode()" class="text-rag-grayLight hover:underline">Fazer Login</button>
-                </p>
-            </form>
+              </div>
+            </div>
+          </div>
         </div>
-    </div>
-    
-    <div class="flex h-full filter blur-md pointer-events-none transition-all duration-500" id="main-app-content">
+      </section>
 
-        <aside id="sidebar"
-            class="fixed inset-y-0 left-0 z-50 w-64 bg-rag-panel border-r border-rag-accent/50 transform -translate-x-full transition-transform duration-300 md:relative md:translate-x-0 flex flex-col">
+      <!-- ===== UPLOAD VIEW ===== -->
+      <section id="view-upload" class="view-panel hidden h-full overflow-y-auto p-6 md:p-8">
+        <div class="max-w-7xl mx-auto w-full space-y-8">
+          <div>
+            <h1 class="text-3xl font-headline font-extrabold text-on-surface tracking-tight mb-1">Upload de Documentos</h1>
+            <p class="text-on-surface-variant">Gerencie seus arquivos para análise inteligente com processamento RAG.</p>
+          </div>
+          <div class="grid grid-cols-12 gap-8">
+            <!-- Upload zone -->
+            <div class="col-span-12 lg:col-span-5 space-y-6">
+              <div id="upload-zone" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)"
+                class="bg-surface-container-lowest p-8 rounded-xl border-2 border-dashed border-outline-variant/30 flex flex-col items-center justify-center text-center space-y-4 hover:border-tertiary/50 transition-colors group cursor-pointer h-72">
+                <input type="file" id="file-input" class="hidden" multiple accept=".pdf,.docx,.txt,.zip"/>
+                <div class="w-16 h-16 rounded-full bg-tertiary/10 flex items-center justify-center text-tertiary group-hover:scale-110 transition-transform">
+                  <span class="material-symbols-outlined text-4xl">upload_file</span>
+                </div>
+                <div class="space-y-1">
+                  <h3 class="text-lg font-headline font-bold text-on-surface">Arraste seus arquivos aqui</h3>
+                  <p class="text-sm text-on-surface-variant max-w-xs">Suporta PDF, DOCX, TXT e pacotes ZIP até 50MB.</p>
+                </div>
+                <button onclick="document.getElementById('file-input').click()" class="bg-surface-container-high text-on-surface font-headline font-semibold px-6 py-2.5 rounded-xl hover:bg-surface-container-highest transition-colors">
+                  Selecionar Arquivos
+                </button>
+              </div>
 
-            <div class="p-4 border-b border-rag-accent/50 flex flex-col gap-4">
+              <!-- Upload queue -->
+              <div id="upload-queue" class="hidden bg-surface-container-low p-6 rounded-xl space-y-3">
                 <div class="flex items-center justify-between">
-                    <h2 class="text-xs font-semibold text-rag-gray uppercase tracking-widest">Menu</h2>
-                    <button id="close-sidebar-btn" class="md:hidden text-gray-400 hover:text-white">
-                        <i data-lucide="x" class="w-5 h-5"></i>
+                  <h4 class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Fila de Upload</h4>
+                  <button id="send-files-btn" class="text-xs font-bold bg-gradient-to-br from-primary to-primary-dim text-on-primary px-4 py-1.5 rounded-lg hover:opacity-90 transition-all">
+                    Enviar Todos
+                  </button>
+                </div>
+                <div id="queue-list" class="space-y-2"></div>
+              </div>
+
+              <!-- Recent activity -->
+              <div class="bg-surface-container-low p-6 rounded-xl space-y-4">
+                <h4 class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Atividade Recente</h4>
+                <div id="recent-uploads-list" class="space-y-3">
+                  <div class="text-sm text-on-surface-variant italic">Carregando...</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Managed files table -->
+            <div class="col-span-12 lg:col-span-7">
+              <div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden border border-outline-variant/10">
+                <div class="p-5 border-b border-surface-container-low flex justify-between items-center">
+                  <h3 class="text-lg font-headline font-bold text-on-surface">Arquivos Gerenciados</h3>
+                  <div class="flex gap-2">
+                    <button class="p-2 rounded-lg hover:bg-surface-container-high text-on-surface-variant transition-colors">
+                      <span class="material-symbols-outlined text-sm">filter_list</span>
                     </button>
-                </div>
-                <div class="flex flex-col items-center justify-center py-2 gap-2">
-                    <div class="w-12 h-12 rounded-xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center">
-                        <i data-lucide="database" class="w-6 h-6 text-rag-gray"></i>
-                    </div>
-                    <span class="text-[10px] text-rag-gray font-bold tracking-[0.3em] uppercase">CoreRetrieve</span>
-                    <span class="text-[9px] text-gray-500 tracking-wider">Motor Semântico</span>
-                </div>
-            </div>
-
-            <div class="p-4">
-                <button id="new-chat-btn"
-                    class="w-full flex items-center justify-center gap-2 bg-rag-gray/10 hover:bg-rag-gray/20 text-rag-gray border border-rag-gray/50 rounded-lg p-3 transition-all hover:shadow-lg shadow-rag-gray/5 group">
-                    <i data-lucide="plus" class="w-4 h-4 group-hover:scale-110 transition-transform"></i>
-                    <span class="font-medium">Nova Consulta</span>
-                </button>
-            </div>
-
-            <div class="px-4 pb-3">
-                <button id="open-docs-btn"
-                    class="w-full flex items-center justify-center gap-2 bg-rag-accent hover:bg-rag-accent/80 text-gray-300 hover:text-white border border-white/5 rounded-lg p-2.5 transition-all text-sm group">
-                    <i data-lucide="file-up" class="w-4 h-4 text-rag-grayLight group-hover:scale-110 transition-transform"></i>
-                    <span>Gerenciar Documentos</span>
-                </button>
-            </div>
-
-            <div class="flex-1 overflow-y-auto custom-scrollbar p-2 space-y-1">
-                <div class="px-2 pb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Histórico</div>
-                <div id="history-list" class="space-y-1">
-                    <div class="text-center text-sm text-gray-600 py-4 italic">Carregando...</div>
-                </div>
-            </div>
-
-            <div class="p-4 border-t border-rag-accent/50 space-y-2">
-                <button id="clear-memory-btn"
-                    class="w-full flex items-center gap-2 text-red-400 hover:text-red-300 hover:bg-red-900/10 p-2 rounded-lg transition-colors text-sm">
-                    <i data-lucide="trash-2" class="w-4 h-4"></i>
-                    <span>Apagar Memória</span>
-                </button>
-                <button id="open-settings-btn"
-                    class="w-full flex items-center gap-2 text-gray-400 hover:text-white hover:bg-rag-accent p-2 rounded-lg transition-colors text-sm">
-                    <i data-lucide="settings" class="w-4 h-4"></i>
-                    <span>Configurações</span>
-                </button>
-            </div>
-        </aside>
-
-        <div class="flex-1 flex flex-col h-full relative w-full min-w-0">
-
-            <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-40 hidden md:hidden opacity-0 transition-opacity"></div>
-
-            <header class="border-b border-rag-accent/50 bg-rag-dark/80 backdrop-blur-md p-4 flex items-center justify-between z-10">
-                <div class="flex items-center gap-3">
-                    <button id="open-sidebar-btn" class="md:hidden text-gray-400 hover:text-rag-gray transition-colors p-2 -ml-2">
-                        <i data-lucide="menu" class="w-5 h-5"></i>
+                    <button class="p-2 rounded-lg hover:bg-surface-container-high text-on-surface-variant transition-colors">
+                      <span class="material-symbols-outlined text-sm">more_vert</span>
                     </button>
-                    <div class="w-10 h-10 rounded-xl bg-rag-panel border border-rag-gray/30 flex items-center justify-center shadow-lg">
-                        <i data-lucide="brain-circuit" class="w-5 h-5 text-rag-gray"></i>
-                    </div>
+                  </div>
+                </div>
+                <div id="files-table-body" class="divide-y divide-surface-container-low">
+                  <div class="p-6 text-sm text-on-surface-variant italic text-center">Nenhum documento enviado ainda.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Info cards -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="bg-surface-container-high/40 p-5 rounded-xl flex items-start gap-4">
+              <span class="material-symbols-outlined text-primary p-2 bg-primary-container rounded-lg">security</span>
+              <div>
+                <h5 class="text-sm font-headline font-bold">Privacidade Total</h5>
+                <p class="text-xs text-on-surface-variant mt-1">Seus documentos são processados localmente e nunca compartilhados com terceiros.</p>
+              </div>
+            </div>
+            <div class="bg-surface-container-high/40 p-5 rounded-xl flex items-start gap-4">
+              <span class="material-symbols-outlined text-tertiary p-2 bg-tertiary-container/20 rounded-lg">psychology</span>
+              <div>
+                <h5 class="text-sm font-headline font-bold">Processamento RAG</h5>
+                <p class="text-xs text-on-surface-variant mt-1">A busca semântica extrai insights precisos dos seus dados em segundos.</p>
+              </div>
+            </div>
+            <div class="bg-surface-container-high/40 p-5 rounded-xl flex items-start gap-4">
+              <span class="material-symbols-outlined text-on-secondary-fixed-variant p-2 bg-secondary-fixed rounded-lg">bolt</span>
+              <div>
+                <h5 class="text-sm font-headline font-bold">Indexação Rápida</h5>
+                <p class="text-xs text-on-surface-variant mt-1">Arquivos pequenos são processados em menos de 10 segundos.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== CHAT VIEW ===== -->
+      <section id="view-chat" class="view-panel hidden h-full flex flex-col">
+        <div class="px-6 py-4 border-b border-surface-container-low shrink-0 flex items-center justify-between bg-surface-container-lowest">
+          <div>
+            <div class="flex items-center gap-2 text-tertiary font-medium text-xs mb-1">
+              <span class="material-symbols-outlined text-sm">verified</span>
+              <span>Respostas baseadas nos seus documentos</span>
+            </div>
+            <h2 class="text-xl font-headline font-extrabold text-on-surface">Chat Inteligente</h2>
+          </div>
+          <div class="flex items-center gap-2">
+            <button id="new-chat-btn" class="flex items-center gap-2 text-xs bg-gradient-to-br from-primary to-primary-dim text-on-primary px-4 py-2 rounded-xl font-semibold hover:opacity-90 transition-all shadow-sm">
+              <span class="material-symbols-outlined text-sm">add</span> Nova Consulta
+            </button>
+          </div>
+        </div>
+
+        <!-- Chat messages -->
+        <div id="chat-messages" class="flex-1 overflow-y-auto px-4 md:px-16 py-8 space-y-8 custom-scrollbar">
+          <!-- Welcome message rendered by JS -->
+        </div>
+
+        <!-- Chat input -->
+        <div class="p-4 md:px-16 bg-gradient-to-t from-surface via-surface to-transparent shrink-0">
+          <div class="max-w-3xl mx-auto">
+            <div class="relative group">
+              <div class="absolute -inset-1 bg-gradient-to-r from-tertiary/20 to-primary/20 rounded-2xl blur opacity-0 group-focus-within:opacity-100 transition duration-500"></div>
+              <div class="relative bg-surface-container-lowest rounded-2xl border border-outline-variant/20 shadow-lg flex flex-col p-2">
+                <textarea id="chat-input" rows="1" placeholder="Pergunte qualquer coisa sobre seus documentos..." class="w-full bg-transparent border-none focus:ring-0 resize-none px-4 py-3 text-on-surface text-sm min-h-[52px] max-h-48 outline-none custom-scrollbar"></textarea>
+                <div class="flex items-center justify-between px-2 pb-1">
+                  <div class="flex items-center gap-1">
+                    <button onclick="switchView('upload')" class="p-2 text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-colors">
+                      <span class="material-symbols-outlined text-xl">attach_file</span>
+                    </button>
+                    <div class="h-5 w-px bg-outline-variant/20 mx-1"></div>
+                    <span class="text-xs text-on-surface-variant px-2">RAG:</span>
+                    <select id="rag-type-select" class="text-xs bg-surface-container-low border-none rounded-lg px-2 py-1 text-on-surface-variant focus:ring-0 outline-none cursor-pointer">
+                      <option value="basico">Básico</option>
+                      <option value="hibrido">Híbrido</option>
+                      <option value="reranking">Re-ranking</option>
+                      <option value="multiquery">Multi-query</option>
+                      <option value="agentico">Agêntico</option>
+                    </select>
+                  </div>
+                  <button id="send-btn" disabled class="h-10 w-10 bg-gradient-to-br from-primary to-primary-dim text-on-primary rounded-xl flex items-center justify-center hover:opacity-90 transition-all shadow-md disabled:opacity-40 disabled:cursor-not-allowed">
+                    <span class="material-symbols-outlined">arrow_upward</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <p class="text-[10px] text-center text-on-surface-variant mt-3 opacity-50">O CoreRetrieve pode cometer erros. Verifique informações importantes.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== SETTINGS VIEW ===== -->
+      <section id="view-settings" class="view-panel hidden h-full overflow-y-auto p-6 md:p-8">
+        <div class="max-w-5xl mx-auto w-full space-y-10">
+          <div>
+            <h2 class="font-headline text-3xl font-extrabold text-on-surface tracking-tight mb-1">Configurações de RAG &amp; IA</h2>
+            <p class="text-on-surface-variant">Ajuste os parâmetros de recuperação e os modelos de linguagem para o seu ambiente.</p>
+          </div>
+
+          <!-- RAG Architecture -->
+          <section class="space-y-5">
+            <h3 class="font-headline text-lg font-bold flex items-center gap-2">
+              <span class="material-symbols-outlined text-tertiary">layers</span> Tipo de Arquitetura RAG
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div id="rag-card-padrao" data-rag="basico" onclick="selectRagCard('basico')" class="rag-arch-card group relative p-6 bg-surface-container-lowest border border-outline-variant/10 rounded-xl hover:border-tertiary/30 transition-all cursor-pointer ring-2 ring-tertiary/40">
+                <div class="flex justify-between items-start mb-4">
+                  <div class="w-12 h-12 bg-primary-container/30 flex items-center justify-center rounded-xl text-primary"><span class="material-symbols-outlined">bolt</span></div>
+                  <span class="bg-tertiary/10 text-tertiary text-[10px] font-bold px-2 py-1 rounded uppercase rag-active-badge">Ativo</span>
+                </div>
+                <h4 class="font-bold text-lg mb-2">RAG Padrão</h4>
+                <p class="text-sm text-on-surface-variant leading-relaxed">Otimizado para velocidade. Utiliza busca vetorial direta com processamento de chunks linear.</p>
+              </div>
+              <div id="rag-card-robusto" data-rag="hibrido" onclick="selectRagCard('hibrido')" class="rag-arch-card group relative p-6 bg-surface-container-low border border-transparent rounded-xl hover:bg-surface-container-high transition-all cursor-pointer">
+                <div class="flex justify-between items-start mb-4">
+                  <div class="w-12 h-12 bg-surface-container-highest flex items-center justify-center rounded-xl text-on-surface-variant"><span class="material-symbols-outlined">verified_user</span></div>
+                  <span class="bg-tertiary/10 text-tertiary text-[10px] font-bold px-2 py-1 rounded uppercase rag-active-badge hidden">Ativo</span>
+                </div>
+                <h4 class="font-bold text-lg mb-2">RAG Robusto</h4>
+                <p class="text-sm text-on-surface-variant leading-relaxed">Focado em precisão absoluta. Inclui re-ranking e busca semântica profunda.</p>
+              </div>
+            </div>
+          </section>
+
+          <!-- Advanced settings grid -->
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            <!-- Left: Tuning knobs -->
+            <div class="lg:col-span-7 space-y-8">
+              <div class="bg-surface-container-lowest p-8 rounded-xl space-y-8 border border-outline-variant/5">
+                <div class="space-y-4">
+                  <div class="flex items-center justify-between">
+                    <label class="font-bold text-sm">Quantidade de Chunks (Top-K)</label>
+                    <span id="topk-display" class="text-tertiary font-mono font-bold">5</span>
+                  </div>
+                  <input id="topk-slider" type="range" min="1" max="20" value="5" oninput="document.getElementById('topk-display').textContent=this.value" class="w-full h-1.5 bg-surface-container-high rounded-full appearance-none cursor-pointer accent-tertiary"/>
+                  <div class="flex justify-between text-[10px] text-on-surface-variant font-medium">
+                    <span>VELOCIDADE</span><span>CONTEXTO AMPLO</span>
+                  </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                  <div>
+                    <label class="text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2 block">Tamanho do Chunk</label>
+                    <input id="chunk-size" type="number" value="512" min="128" max="2048" step="64" class="w-full bg-surface-container-low border-none rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-tertiary/20 outline-none"/>
+                  </div>
+                  <div>
+                    <label class="text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2 block">Overlap (tokens)</label>
+                    <input id="chunk-overlap" type="number" value="64" min="0" max="512" step="16" class="w-full bg-surface-container-low border-none rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-tertiary/20 outline-none"/>
+                  </div>
+                </div>
+                <div class="pt-4 border-t border-outline-variant/10 space-y-4">
+                  <h4 class="text-xs font-bold uppercase tracking-wider text-on-surface-variant/70">Otimizações do Motor</h4>
+                  <div class="flex items-center justify-between p-3 rounded-lg hover:bg-surface-container-low transition-colors">
                     <div>
-                        <h1 class="text-xl font-semibold tracking-wide text-white">CoreRetrieve</h1>
-                        <p class="text-xs text-gray-400 font-light tracking-wider">RECUPERAÇÃO AUMENTADA COM GERAÇÃO</p>
+                      <p class="text-sm font-semibold">Re-ranking de Resultados</p>
+                      <p class="text-xs text-on-surface-variant">Reordena chunks baseado em relevância cruzada.</p>
                     </div>
-                </div>
-                <div class="hidden md:flex items-center gap-2">
-                    <span class="text-xs text-gray-500">Modo ativo:</span>
-                    <span id="header-rag-type" class="text-xs font-semibold text-rag-grayLight bg-rag-gray/10 border border-rag-gray/30 rounded-full px-3 py-1">
-                        Básico
-                    </span>
-                </div>
-            </header>
-
-            <main id="chat-container" class="flex-1 overflow-y-auto p-4 md:p-8 scroll-smooth custom-scrollbar relative">
-                <div class="max-w-3xl mx-auto space-y-6 pb-24">
-
-                    <div class="flex gap-4 animate-fade-in flex-col items-center mb-10 text-center">
-                        <div class="w-20 h-20 rounded-2xl bg-rag-gray/10 border border-rag-gray/30 flex items-center justify-center mb-2 shadow-lg shadow-blue-900/20">
-                            <i data-lucide="search-code" class="w-10 h-10 text-rag-gray"></i>
-                        </div>
-                        <div class="max-w-md bg-rag-panel/60 backdrop-blur-sm p-6 rounded-2xl border border-white/5 shadow-2xl">
-                            <p class="text-lg text-white font-medium mb-3">Sistema RAG Pronto</p>
-                            <p class="text-gray-400 text-sm leading-relaxed">
-                                Faça upload dos seus documentos, escolha o tipo de RAG desejado e comece a consultar seus dados com precisão semântica.
-                            </p>
-                            <div class="flex gap-2 mt-4 justify-center flex-wrap">
-                                <button onclick="openDocsModal()" class="flex items-center gap-1.5 text-xs bg-rag-gray/15 hover:bg-rag-gray/25 text-rag-grayLight border border-rag-gray/30 rounded-full px-3 py-1.5 transition-all">
-                                    <i data-lucide="upload" class="w-3 h-3"></i> Enviar Documentos
-                                </button>
-                                <button onclick="openDocsModal()" class="flex items-center gap-1.5 text-xs bg-rag-accent hover:bg-rag-accent/80 text-gray-300 border border-white/5 rounded-full px-3 py-1.5 transition-all">
-                                    <i data-lucide="sliders" class="w-3 h-3"></i> Configurar RAG
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-            </main>
-
-            <footer class="p-3 bg-rag-dark/95 backdrop-blur-md border-t border-rag-accent/50">
-                <div class="max-w-3xl mx-auto space-y-2">
-
-                    <div class="flex items-center gap-2 px-1 flex-wrap">
-                        <div class="flex items-center gap-1.5">
-                            <i data-lucide="zap" class="w-3.5 h-3.5 text-rag-gray flex-shrink-0"></i>
-                            <span class="text-xs text-gray-500">Tipo de RAG:</span>
-                        </div>
-                        <div class="flex gap-1.5 flex-wrap">
-                            <button onclick="setRagType('basico', this)" data-rag="basico"
-                                class="rag-type-btn active-rag text-xs px-2.5 py-1 rounded-full border border-rag-gray/50 bg-rag-gray/15 text-rag-grayLight transition-all">
-                                Básico
-                            </button>
-                            <button onclick="setRagType('hibrido', this)" data-rag="hibrido"
-                                class="rag-type-btn text-xs px-2.5 py-1 rounded-full border border-white/10 bg-rag-accent text-gray-400 hover:text-white hover:border-rag-gray/40 transition-all">
-                                Híbrido
-                            </button>
-                            <button onclick="setRagType('reranking', this)" data-rag="reranking"
-                                class="rag-type-btn text-xs px-2.5 py-1 rounded-full border border-white/10 bg-rag-accent text-gray-400 hover:text-white hover:border-rag-gray/40 transition-all">
-                                Re-ranking
-                            </button>
-                            <button onclick="setRagType('multiquery', this)" data-rag="multiquery"
-                                class="rag-type-btn text-xs px-2.5 py-1 rounded-full border border-white/10 bg-rag-accent text-gray-400 hover:text-white hover:border-rag-gray/40 transition-all">
-                                Multi-query
-                            </button>
-                            <button onclick="setRagType('agentico', this)" data-rag="agentico"
-                                class="rag-type-btn text-xs px-2.5 py-1 rounded-full border border-white/10 bg-rag-accent text-gray-400 hover:text-white hover:border-rag-gray/40 transition-all">
-                                Agêntico
-                            </button>
-                        </div>
-
-                        <div class="ml-auto flex items-center gap-1.5">
-                            <button onclick="openDocsModal()" class="flex items-center gap-1 text-xs text-gray-500 hover:text-rag-grayLight transition-colors">
-                                <i data-lucide="paperclip" class="w-3.5 h-3.5"></i>
-                                <span id="docs-count-label">0 docs</span>
-                            </button>
-                        </div>
-                    </div>
-
-                    <form id="chat-form" class="relative group">
-                        <div class="absolute inset-0 bg-gradient-to-r from-blue-600/15 to-indigo-500/15 rounded-xl blur opacity-0 group-hover:opacity-100 transition duration-500"></div>
-                        <div class="relative bg-rag-panel rounded-xl overflow-hidden shadow-2xl border border-white/10 focus-within:border-rag-gray/50 transition-colors">
-                            <textarea id="user-input" rows="1"
-                                class="w-full bg-transparent text-white p-4 pr-14 outline-none resize-none placeholder-gray-600 custom-scrollbar max-h-40"
-                                placeholder="Faça uma pergunta sobre seus documentos..."
-                                oninput="this.style.height = ''; this.style.height = this.scrollHeight + 'px'"></textarea>
-                            <button type="submit" id="send-btn"
-                                class="absolute right-2 bottom-2 p-2 bg-rag-gray text-white rounded-lg hover:bg-rag-grayLight transition-all transform hover:scale-105 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100"
-                                disabled>
-                                <i data-lucide="send" class="w-5 h-5"></i>
-                            </button>
-                        </div>
-                    </form>
-
-                    <p class="text-center text-[10px] text-gray-600 font-light">
-                        RAG Nativo · Sem frameworks externos · Implementação própria
-                    </p>
-                </div>
-            </footer>
-        </div>
-
-    </div>
-
-    <div id="docs-modal" class="fixed inset-0 z-[100] hidden items-center justify-center">
-        <div id="docs-overlay" class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
-        <div id="docs-card"
-            class="relative bg-rag-panel border border-white/10 rounded-2xl shadow-2xl p-6 w-[90%] max-w-lg mx-auto transform scale-95 opacity-0 transition-all duration-200 max-h-[85vh] flex flex-col">
-
-            <div class="flex items-center justify-between mb-5 flex-shrink-0">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-full bg-rag-gray/10 flex items-center justify-center border border-rag-gray/20">
-                        <i data-lucide="files" class="w-5 h-5 text-rag-gray"></i>
-                    </div>
+                    <label class="toggle-switch"><input type="checkbox" id="toggle-reranking"/><div class="toggle-track"></div></label>
+                  </div>
+                  <div class="flex items-center justify-between p-3 rounded-lg hover:bg-surface-container-low transition-colors">
                     <div>
-                        <h3 class="text-lg font-semibold text-white">Documentos & RAG</h3>
-                        <p class="text-xs text-gray-500">Gerencie seus arquivos e configure o pipeline</p>
+                      <p class="text-sm font-semibold text-tertiary-fixed-dim">Busca Híbrida (BM25 + Vector)</p>
+                      <p class="text-xs text-on-surface-variant">Combina busca por palavra-chave e significado vetorial.</p>
                     </div>
+                    <label class="toggle-switch"><input type="checkbox" id="toggle-hybrid" checked/><div class="toggle-track"></div></label>
+                  </div>
+                  <div class="flex items-center justify-between p-3 rounded-lg hover:bg-surface-container-low transition-colors">
+                    <div>
+                      <p class="text-sm font-semibold">Filtro de Similaridade Semântica</p>
+                      <p class="text-xs text-on-surface-variant">Ignora chunks com score abaixo de 0.75.</p>
+                    </div>
+                    <label class="toggle-switch"><input type="checkbox" id="toggle-similarity"/><div class="toggle-track"></div></label>
+                  </div>
                 </div>
-                <button id="close-docs-btn" class="text-gray-400 hover:text-white transition-colors p-1">
-                    <i data-lucide="x" class="w-5 h-5"></i>
-                </button>
+              </div>
             </div>
 
-            <div class="overflow-y-auto custom-scrollbar flex-1 space-y-5 pr-1">
-
+            <!-- Right: AI Provider -->
+            <aside class="lg:col-span-5 space-y-5">
+              <div class="bg-surface-container border border-outline-variant/10 rounded-xl p-8 space-y-6">
+                <h3 class="font-headline text-lg font-bold flex items-center gap-2">
+                  <span class="material-symbols-outlined text-tertiary">psychology</span> Provedor de IA
+                </h3>
+                <div class="space-y-4">
+                  <div>
+                    <label class="text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2 block">Provedor</label>
+                    <div class="relative">
+                      <select id="llm-provider" onchange="updateModels()" class="w-full bg-surface-container-lowest border-none rounded-xl py-3 px-4 text-sm focus:ring-2 focus:ring-tertiary/20 appearance-none cursor-pointer outline-none">
+                        <option value="gemini">Google Gemini</option>
+                        <option value="openai">OpenAI</option>
+                        <option value="claude">Anthropic Claude</option>
+                      </select>
+                      <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none">unfold_more</span>
+                    </div>
+                  </div>
+                  <div>
+                    <label class="text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2 block">Modelo</label>
+                    <div class="relative">
+                      <select id="llm-model" class="w-full bg-surface-container-lowest border-none rounded-xl py-3 px-4 text-sm focus:ring-2 focus:ring-tertiary/20 appearance-none cursor-pointer outline-none">
+                        <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
+                        <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
+                      </select>
+                      <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none">unfold_more</span>
+                    </div>
+                  </div>
+                  <div>
+                    <label class="text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2 block">API Key (Opcional)</label>
+                    <div class="relative">
+                      <input id="llm-api-key" type="password" placeholder="Usar chave do servidor" class="w-full bg-surface-container-lowest border-none rounded-xl py-3 px-4 text-sm focus:ring-2 focus:ring-tertiary/20 outline-none"/>
+                    </div>
+                    <p class="text-[10px] text-on-surface-variant/70 italic px-1 mt-1">Sua chave é criptografada localmente.</p>
+                  </div>
+                </div>
+                <div class="bg-tertiary-fixed/10 p-4 rounded-lg border border-tertiary-fixed/20">
+                  <div class="flex gap-3">
+                    <span class="material-symbols-outlined text-tertiary">verified</span>
+                    <div>
+                      <p class="text-sm font-bold">Conexão Ativa</p>
+                      <p class="text-xs text-on-surface-variant">Backend FastAPI em execução</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="p-5 bg-gradient-to-br from-surface-container-low to-surface-container-high rounded-xl flex items-start gap-4 border border-outline-variant/10">
+                <span class="material-symbols-outlined text-primary-dim">lightbulb</span>
                 <div>
-                    <label class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 block">
-                        Upload de Documentos
-                    </label>
-                    <div id="upload-zone" class="upload-zone" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
-                        <input type="file" id="file-input" class="hidden" multiple accept=".zip">
-                        <div class="flex flex-col items-center gap-3 pointer-events-none">
-                            <div class="w-12 h-12 rounded-xl bg-rag-gray/10 border border-rag-gray/20 flex items-center justify-center">
-                                <i data-lucide="cloud-upload" class="w-6 h-6 text-rag-gray"></i>
-                            </div>
-                            <div>
-                                <p class="text-sm text-gray-300">
-                                    Arraste arquivos ou
-                                    <button class="text-rag-grayLight hover:underline pointer-events-auto" onclick="document.getElementById('file-input').click()">clique para selecionar</button>
-                                </p>
-                                <p class="text-xs text-gray-500 mt-1">.ZIP</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div id="uploaded-files" class="mt-3 flex flex-wrap gap-2"></div>
+                  <p class="text-xs font-bold uppercase tracking-widest opacity-60 mb-1">Dica Pro</p>
+                  <p class="text-sm text-on-surface-variant leading-relaxed">Para documentos técnicos complexos, prefira <strong>RAG Robusto</strong> com <strong>Claude 3.5</strong> para melhores insights semânticos.</p>
                 </div>
+              </div>
+            </aside>
+          </div>
 
-                <div>
-                    <label class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 block">
-                        Tipo de RAG
-                    </label>
-                    <div class="space-y-2" id="rag-type-selector">
-
-                        <label class="flex items-start gap-3 p-3 rounded-xl bg-rag-accent border border-rag-gray/30 cursor-pointer hover:bg-rag-accent/80 transition-colors rag-option selected-rag">
-                            <input type="radio" name="rag_type" value="basico" checked class="mt-0.5 accent-blue-500">
-                            <div>
-                                <p class="text-sm font-medium text-white">RAG Básico</p>
-                                <p class="text-xs text-gray-400 mt-0.5">Busca por similaridade de embeddings. Simples e eficiente para documentos homogêneos.</p>
-                            </div>
-                        </label>
-
-                        <label class="flex items-start gap-3 p-3 rounded-xl bg-rag-accent border border-white/5 cursor-pointer hover:bg-rag-accent/80 transition-colors rag-option">
-                            <input type="radio" name="rag_type" value="hibrido" class="mt-0.5 accent-blue-500">
-                            <div>
-                                <p class="text-sm font-medium text-white">RAG Híbrido</p>
-                                <p class="text-xs text-gray-400 mt-0.5">Combina busca vetorial (semântica) com busca BM25 (léxica) para maior precisão.</p>
-                            </div>
-                        </label>
-
-                        <label class="flex items-start gap-3 p-3 rounded-xl bg-rag-accent border border-white/5 cursor-pointer hover:bg-rag-accent/80 transition-colors rag-option">
-                            <input type="radio" name="rag_type" value="reranking" class="mt-0.5 accent-blue-500">
-                            <div>
-                                <p class="text-sm font-medium text-white">RAG com Re-ranking</p>
-                                <p class="text-xs text-gray-400 mt-0.5">Recupera mais candidatos e re-ordena com cross-encoder para alta relevância.</p>
-                            </div>
-                        </label>
-
-                        <label class="flex items-start gap-3 p-3 rounded-xl bg-rag-accent border border-white/5 cursor-pointer hover:bg-rag-accent/80 transition-colors rag-option">
-                            <input type="radio" name="rag_type" value="multiquery" class="mt-0.5 accent-blue-500">
-                            <div>
-                                <p class="text-sm font-medium text-white">Multi-query RAG</p>
-                                <p class="text-xs text-gray-400 mt-0.5">Gera múltiplas variações da query para cobrir diferentes perspectivas semânticas.</p>
-                            </div>
-                        </label>
-
-                        <label class="flex items-start gap-3 p-3 rounded-xl bg-rag-accent border border-white/5 cursor-pointer hover:bg-rag-accent/80 transition-colors rag-option">
-                            <input type="radio" name="rag_type" value="agentico" class="mt-0.5 accent-blue-500">
-                            <div>
-                                <p class="text-sm font-medium text-white">RAG Agêntico</p>
-                                <p class="text-xs text-gray-400 mt-0.5">O modelo decide autonomamente quando e como buscar, ideal para queries complexas.</p>
-                            </div>
-                        </label>
-
-                    </div>
-                </div>
-
-                <div>
-                    <label class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 block">
-                        Configuração de Chunks
-                    </label>
-                    <div class="grid grid-cols-2 gap-3">
-                        <div class="bg-rag-accent/50 rounded-xl p-3 border border-white/5">
-                            <label class="text-xs text-gray-400 block mb-1">Tamanho do Chunk</label>
-                            <input type="number" id="chunk-size" value="512" min="128" max="2048" step="64"
-                                class="w-full bg-rag-dark/80 text-gray-200 text-sm rounded-lg px-3 py-1.5 outline-none border border-white/10 focus:border-rag-gray/50 transition-colors">
-                        </div>
-                        <div class="bg-rag-accent/50 rounded-xl p-3 border border-white/5">
-                            <label class="text-xs text-gray-400 block mb-1">Sobreposição (tokens)</label>
-                            <input type="number" id="chunk-overlap" value="64" min="0" max="512" step="16"
-                                class="w-full bg-rag-dark/80 text-gray-200 text-sm rounded-lg px-3 py-1.5 outline-none border border-white/10 focus:border-rag-gray/50 transition-colors">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-rag-accent/50 rounded-xl p-4 border border-white/5">
-                    <div class="flex items-center justify-between mb-2">
-                        <div class="flex items-center gap-2">
-                            <i data-lucide="layers" class="w-4 h-4 text-rag-gray"></i>
-                            <label class="text-sm font-medium text-white">Top-K Chunks Recuperados</label>
-                        </div>
-                        <span id="topk-value" class="text-rag-grayLight font-semibold text-sm">5</span>
-                    </div>
-                    <input type="range" id="topk-slider" min="1" max="20" value="5"
-                        class="w-full accent-blue-500" oninput="document.getElementById('topk-value').textContent = this.value">
-                </div>
-
+          <!-- Danger zone -->
+          <div class="pt-6 border-t border-outline-variant/10">
+            <h3 class="font-headline text-lg font-bold text-error mb-4 flex items-center gap-2"><span class="material-symbols-outlined">warning</span> Zona de Perigo</h3>
+            <div class="bg-error/5 border border-error/20 rounded-xl p-5 flex items-center justify-between">
+              <div>
+                <p class="text-sm font-bold text-on-surface">Apagar Toda Memória</p>
+                <p class="text-xs text-on-surface-variant mt-0.5">Remove permanentemente todas as sessões e histórico de chat.</p>
+              </div>
+              <button id="clear-all-btn" class="px-4 py-2 rounded-xl text-sm font-bold text-error border border-error/30 hover:bg-error hover:text-white transition-all">Apagar</button>
             </div>
+          </div>
 
-            <div class="flex gap-3 justify-end mt-5 flex-shrink-0 border-t border-white/5 pt-4">
-                <button id="close-docs-btn-2"
-                    class="px-4 py-2 rounded-lg text-sm font-medium text-gray-300 bg-rag-accent hover:bg-rag-accent/80 border border-white/5 transition-colors">Cancelar</button>
-                <button onclick="applyDocsConfig()"
-                    class="px-4 py-2 rounded-lg text-sm font-medium text-white bg-rag-gray hover:bg-rag-grayDark transition-colors shadow-lg shadow-blue-600/20 flex items-center gap-2">
-                    <i data-lucide="check" class="w-4 h-4"></i>
-                    Aplicar Configuração
-                </button>
-            </div>
+          <!-- Footer save -->
+          <footer class="flex items-center justify-end gap-4 pt-4 border-t border-outline-variant/10">
+            <button class="px-6 py-2.5 rounded-lg text-sm font-bold text-on-surface-variant hover:bg-surface-container-high transition-all">Descartar</button>
+            <button id="save-settings-btn" class="px-8 py-2.5 rounded-xl text-sm font-bold bg-gradient-to-br from-primary to-primary-dim text-on-primary shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all">
+              Salvar Configurações
+            </button>
+          </footer>
         </div>
-    </div>
+      </section>
 
-    <div id="confirm-modal" class="fixed inset-0 z-[100] hidden items-center justify-center">
-        <div id="confirm-overlay" class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
-        <div id="confirm-card"
-            class="relative bg-rag-panel border border-white/10 rounded-2xl shadow-2xl p-6 w-[90%] max-w-sm mx-auto transform scale-95 opacity-0 transition-all duration-200">
-            <div class="flex items-center gap-3 mb-3">
-                <div class="w-10 h-10 rounded-full bg-red-500/10 flex items-center justify-center border border-red-500/20">
-                    <i data-lucide="alert-triangle" class="w-5 h-5 text-red-400"></i>
-                </div>
-                <h3 id="confirm-title" class="text-lg font-semibold text-white">Confirmar</h3>
+      <!-- ===== HISTORY VIEW ===== -->
+      <section id="view-history" class="view-panel hidden h-full overflow-y-auto p-6 md:p-8">
+        <div class="max-w-4xl mx-auto w-full space-y-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 class="font-headline text-3xl font-extrabold text-on-surface tracking-tight mb-1">Histórico</h2>
+              <p class="text-on-surface-variant">Todas as suas sessões de chat anteriores.</p>
             </div>
-            <p id="confirm-message" class="text-gray-300 text-sm mb-6 leading-relaxed">Tem certeza?</p>
-            <div class="flex gap-3 justify-end">
-                <button id="confirm-cancel-btn" class="px-4 py-2 rounded-lg text-sm font-medium text-gray-300 bg-rag-accent hover:bg-rag-accent/80 border border-white/5 transition-colors">Cancelar</button>
-                <button id="confirm-ok-btn" class="px-4 py-2 rounded-lg text-sm font-medium text-white bg-red-600 hover:bg-red-500 transition-colors shadow-lg shadow-red-600/20">Confirmar</button>
-            </div>
+            <button id="clear-history-btn" class="flex items-center gap-2 text-xs text-error border border-error/30 px-4 py-2 rounded-xl hover:bg-error hover:text-white transition-all font-semibold">
+              <span class="material-symbols-outlined text-sm">delete_sweep</span> Apagar Tudo
+            </button>
+          </div>
+          <div id="history-list" class="space-y-3">
+            <div class="text-sm text-on-surface-variant italic text-center py-8">Carregando...</div>
+          </div>
         </div>
+      </section>
+
+    </div><!-- end view-container -->
+
+    <!-- Mobile bottom nav -->
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-surface/95 backdrop-blur-md border-t border-outline-variant/10 flex items-center justify-around z-50">
+      <button data-view="dashboard" class="mob-nav flex flex-col items-center gap-1 text-on-surface-variant px-3">
+        <span class="material-symbols-outlined text-xl">dashboard</span>
+        <span class="text-[9px] font-semibold">Dashboard</span>
+      </button>
+      <button data-view="chat" class="mob-nav flex flex-col items-center gap-1 text-on-surface-variant px-3">
+        <span class="material-symbols-outlined text-xl">forum</span>
+        <span class="text-[9px] font-semibold">Chat</span>
+      </button>
+      <button data-view="upload" class="mob-nav flex flex-col items-center gap-1 text-on-surface-variant px-3">
+        <span class="material-symbols-outlined text-xl">cloud_upload</span>
+        <span class="text-[9px] font-semibold">Upload</span>
+      </button>
+      <button data-view="history" class="mob-nav flex flex-col items-center gap-1 text-on-surface-variant px-3">
+        <span class="material-symbols-outlined text-xl">history</span>
+        <span class="text-[9px] font-semibold">Histórico</span>
+      </button>
+      <button data-view="settings" class="mob-nav flex flex-col items-center gap-1 text-on-surface-variant px-3">
+        <span class="material-symbols-outlined text-xl">settings</span>
+        <span class="text-[9px] font-semibold">Config</span>
+      </button>
+    </nav>
+
+  </div><!-- end main content -->
+</div><!-- end main-app -->
+
+<!-- TOAST CONTAINER -->
+<div id="toast-container" class="fixed top-6 right-6 z-[300] flex flex-col gap-3 pointer-events-none"></div>
+
+<!-- CONFIRM MODAL -->
+<div id="confirm-modal" class="fixed inset-0 z-[250] hidden items-center justify-center">
+  <div id="confirm-overlay" class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+  <div id="confirm-card" class="relative bg-surface-container-lowest border border-outline-variant/20 rounded-2xl shadow-2xl p-7 w-[90%] max-w-sm mx-auto transform scale-95 opacity-0 transition-all duration-200">
+    <div class="flex items-center gap-3 mb-3">
+      <div class="w-10 h-10 rounded-full bg-error/10 flex items-center justify-center border border-error/20">
+        <span class="material-symbols-outlined text-error">warning</span>
+      </div>
+      <h3 id="confirm-title" class="text-lg font-headline font-semibold text-on-surface">Confirmar</h3>
     </div>
-
-    <div id="toast-container" class="fixed top-6 right-6 z-[110] flex flex-col gap-3 pointer-events-none"></div>
-
-    <div id="settings-modal" class="fixed inset-0 z-[100] hidden items-center justify-center">
-        <div id="settings-overlay" class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
-        <div id="settings-card"
-            class="relative bg-rag-panel border border-white/10 rounded-2xl shadow-2xl p-6 w-[90%] max-w-md mx-auto transform scale-95 opacity-0 transition-all duration-200">
-            <div class="flex items-center justify-between mb-6">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-full bg-rag-gray/10 flex items-center justify-center border border-rag-gray/20">
-                        <i data-lucide="settings" class="w-5 h-5 text-rag-gray"></i>
-                    </div>
-                    <h3 class="text-lg font-semibold text-white">Configurações</h3>
-                </div>
-                <button id="close-settings-btn" class="text-gray-400 hover:text-white transition-colors p-1">
-                    <i data-lucide="x" class="w-5 h-5"></i>
-                </button>
-            </div>
-
-            <div class="space-y-4">
-                <div class="bg-rag-accent/50 rounded-xl p-4 border border-white/5">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-3">
-                            <i data-lucide="palette" class="w-4 h-4 text-rag-gray"></i>
-                            <div>
-                                <p class="text-sm font-medium text-white">Tema</p>
-                                <p class="text-xs text-gray-400">Aparência da interface</p>
-                            </div>
-                        </div>
-                        <select id="theme-select"
-                            class="bg-rag-dark border border-white/10 text-gray-200 text-sm rounded-lg px-3 py-1.5 outline-none focus:border-rag-gray/50 transition-colors">
-                            <option value="dark">Escuro</option>
-                            <option value="light">Claro</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="bg-rag-accent/50 rounded-xl p-4 border border-white/5">
-                    <div class="flex items-center gap-3 mb-3">
-                        <i data-lucide="cpu" class="w-4 h-4 text-rag-gray"></i>
-                        <p class="text-sm font-medium text-white">Modelo LLM</p>
-                    </div>
-                    <div class="space-y-3">
-                        <div>
-                            <label class="text-xs text-gray-400 block mb-1">Provedor</label>
-                            <select id="llm-provider" onchange="updateModels()"
-                                class="w-full bg-rag-dark border border-white/10 text-gray-200 text-sm rounded-lg px-3 py-1.5 outline-none focus:border-rag-gray/50 transition-colors">
-                                <option value="gemini">Google Gemini</option>
-                                <option value="openai">OpenAI</option>
-                                <option value="claude">Anthropic Claude</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="text-xs text-gray-400 block mb-1">Modelo</label>
-                            <select id="llm-model"
-                                class="w-full bg-rag-dark border border-white/10 text-gray-200 text-sm rounded-lg px-3 py-1.5 outline-none focus:border-rag-gray/50 transition-colors">
-                                <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
-                                <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="text-xs text-gray-400 block mb-1">API Key (Opcional)</label>
-                            <input type="password" id="llm-api-key" placeholder="Usar padrão do servidor"
-                                class="w-full bg-rag-dark border border-white/10 text-gray-200 text-sm rounded-lg px-3 py-1.5 outline-none focus:border-rag-gray/50 transition-colors">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-rag-accent/50 rounded-xl p-4 border border-white/5">
-                    <div class="flex items-center gap-3 mb-3">
-                        <i data-lucide="user" class="w-4 h-4 text-rag-gray"></i>
-                        <p class="text-sm font-medium text-white">Conta</p>
-                    </div>
-                    <button onclick="logout()" class="w-full text-xs text-red-400 hover:text-red-300 hover:bg-red-900/10 border border-red-500/20 py-2 rounded-lg transition-colors">
-                        Sair da Conta
-                    </button>
-                    <button onclick="saveSettings()" class="w-full text-xs bg-rag-gray hover:bg-rag-grayDark text-white mt-2 py-2 rounded-lg transition-colors">
-                        Salvar Configurações
-                    </button>
-                </div>
-
-                <div class="text-center pt-2 border-t border-white/5">
-                    <p class="text-xs text-gray-500">CoreRetrieve · v1.0</p>
-                    <p class="text-[10px] text-gray-600 mt-1">Motor de Busca Semântica</p>
-                </div>
-            </div>
-        </div>
+    <p id="confirm-message" class="text-on-surface-variant text-sm mb-6 leading-relaxed">Tem certeza?</p>
+    <div class="flex gap-3 justify-end">
+      <button id="confirm-cancel-btn" class="px-5 py-2 rounded-xl text-sm font-bold text-on-surface-variant bg-surface-container-high hover:bg-surface-container-highest transition-colors">Cancelar</button>
+      <button id="confirm-ok-btn" class="px-5 py-2 rounded-xl text-sm font-bold text-white bg-error hover:opacity-90 transition-colors">Confirmar</button>
     </div>
+  </div>
+</div>
 
-    <script src="js/app.js"></script>
-    <script>lucide.createIcons();</script>
+<!-- MOBILE SIDEBAR DRAWER -->
+<div id="mob-sidebar-overlay" class="fixed inset-0 z-[100] hidden bg-black/50 backdrop-blur-sm md:hidden"></div>
+<aside id="mob-sidebar" class="fixed inset-y-0 left-0 z-[101] w-72 bg-surface flex flex-col -translate-x-full transition-transform duration-300 md:hidden shadow-2xl">
+  <div class="p-6 flex items-center justify-between border-b border-outline-variant/10">
+    <div class="flex items-center gap-2">
+      <div class="w-8 h-8 bg-gradient-to-br from-primary to-primary-dim rounded-lg flex items-center justify-center text-on-primary">
+        <span class="material-symbols-outlined text-sm">auto_awesome</span>
+      </div>
+      <span class="font-headline font-bold text-on-surface">CoreRetrieve</span>
+    </div>
+    <button id="mob-close-btn" class="text-on-surface-variant"><span class="material-symbols-outlined">close</span></button>
+  </div>
+  <nav class="flex-1 px-4 py-4 space-y-1">
+    <a data-view="dashboard" href="#" class="mob-nav-link flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container-low transition-colors">
+      <span class="material-symbols-outlined">dashboard</span><span>Dashboard</span>
+    </a>
+    <a data-view="upload" href="#" class="mob-nav-link flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container-low transition-colors">
+      <span class="material-symbols-outlined">cloud_upload</span><span>Upload</span>
+    </a>
+    <a data-view="chat" href="#" class="mob-nav-link flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container-low transition-colors">
+      <span class="material-symbols-outlined">forum</span><span>Chat</span>
+    </a>
+    <a data-view="settings" href="#" class="mob-nav-link flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container-low transition-colors">
+      <span class="material-symbols-outlined">settings</span><span>Settings</span>
+    </a>
+    <a data-view="history" href="#" class="mob-nav-link flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-surface-container-low transition-colors">
+      <span class="material-symbols-outlined">history</span><span>History</span>
+    </a>
+  </nav>
+</aside>
+
+<script src="js/app.js"></script>
 </body>
 </html>

@@ -41,3 +41,11 @@ class MessageSchema(BaseModel):
     role: str
     content: str
     created_at: Optional[int] = None
+
+class FileResponse(BaseModel):
+    id: int
+    name: str
+    size: int
+    type: str
+    created_at: int
+    status: str = "Pronto"

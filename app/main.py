@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from app.core.config import settings
 from app.core.database import engine, Base
-from app.api.routes import chat, sessions, auth, users
+from app.api.routes import chat, sessions, auth, users, files
 import os
 
 # Create DB tables
@@ -29,6 +29,7 @@ app.include_router(auth.router, prefix=settings.API_V1_STR + "/auth", tags=["aut
 app.include_router(users.router, prefix=settings.API_V1_STR + "/users", tags=["users"])
 app.include_router(chat.router, prefix=settings.API_V1_STR + "/chat", tags=["chat"])
 app.include_router(sessions.router, prefix=settings.API_V1_STR + "/sessions", tags=["sessions"])
+app.include_router(files.router, prefix=settings.API_V1_STR + "/files", tags=["files"])
 
 @app.get("/api/health")
 def health_check():

@@ -241,8 +241,8 @@ async function loadDashboardData() {
       list.innerHTML = `<div class="text-center py-4 text-sm text-on-surface-variant italic">Nenhuma sessão.</div>`;
     } else {
       list.innerHTML = sessions.slice(0, 4).map(s => `
-        <div onclick="loadChatAndSwitch('${s.session_id}')" class="flex items-center gap-4 p-4 rounded-xl bg-surface hover:bg-surface-container-low transition-colors group cursor-pointer border border-outline-variant/5">
-          <div class="w-10 h-10 rounded-xl bg-surface-container-lowest flex items-center justify-center border border-outline-variant/10 shadow-sm shrink-0">
+        <div onclick="loadChatAndSwitch('${s.session_id}')" class="flex items-center gap-4 p-4 rounded-xl bg-surface border-surface-container-low hover:bg-surface-container-low transition-colors group cursor-pointer border">
+          <div class="w-10 h-10 rounded-xl bg-surface-container-lowest flex items-center justify-center border border-surface-container-low bg-surface-container-lowest shadow-sm shrink-0">
             <span class="material-symbols-outlined text-primary">forum</span>
           </div>
           <div class="flex-1 min-w-0">
@@ -371,7 +371,7 @@ function renderWelcome() {
       <h2 class="text-3xl lg:text-4xl font-headline font-extrabold text-on-surface tracking-tight mb-3">O que vamos analisar hoje?</h2>
       <p class="text-on-surface-variant max-w-sm mx-auto text-sm">Consulte seus dados com precisão semântica via RAG.</p>
       <div class="flex gap-3 justify-center mt-8">
-        <button onclick="switchView('upload')" class="bg-surface-container-lowest border border-outline-variant/20 rounded-xl px-5 py-3 text-sm font-medium hover:bg-surface-container-low transition-colors shadow-sm">Upload</button>
+        <button onclick="switchView('upload')" class="bg-surface-container-lowest border border-surface-container-low rounded-xl px-5 py-3 text-sm font-medium hover:bg-surface-container-low transition-colors shadow-sm">Upload</button>
         <button onclick="switchView('settings')" class="bg-gradient-to-br from-primary to-primary-dim text-on-primary rounded-xl px-5 py-3 text-sm font-bold shadow-sm">Configurar</button>
       </div>
     </div>`;
@@ -421,7 +421,7 @@ function addMessage(text, sender, isError = false) {
   const div = document.createElement('div');
   div.className = 'chat-msg max-w-3xl mx-auto';
   if (sender === 'ai') {
-    div.innerHTML = `<div class="flex flex-col items-start gap-1.5"><div class="flex items-center gap-2"><div class="w-6 h-6 bg-tertiary-fixed text-on-tertiary rounded-md flex items-center justify-center font-bold text-[10px]">AI</div><span class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">CoreRetrieve</span></div><div class="ml-8 bg-surface-container-lowest border border-outline-variant/10 p-5 rounded-2xl rounded-tl-none shadow-sm prose prose-sm ${isError ? 'text-error' : ''}">${marked.parse(text || '')}</div></div>`;
+    div.innerHTML = `<div class="flex flex-col items-start gap-1.5"><div class="flex items-center gap-2"><div class="w-6 h-6 bg-tertiary-fixed text-on-tertiary rounded-md flex items-center justify-center font-bold text-[10px]">AI</div><span class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">CoreRetrieve</span></div><div class="ml-8 bg-surface-container-lowest border border-surface-container-low bg-surface-container-lowest p-5 rounded-2xl rounded-tl-none shadow-sm prose prose-sm ${isError ? 'text-error' : ''}">${marked.parse(text || '')}</div></div>`;
   } else {
     div.innerHTML = `<div class="flex flex-col items-end gap-1"><div class="max-w-[85%] bg-surface-container-highest text-on-surface p-4 rounded-2xl rounded-tr-none shadow-sm text-sm">${escapeHtml(text)}</div></div>`;
   }
@@ -433,7 +433,7 @@ function escapeHtml(t) { return String(t).replace(/&/g, '&amp;').replace(/</g, '
 function showTypingIndicator() {
   const container = document.getElementById('chat-messages');
   const div = document.createElement('div'); div.id = 'typing-indicator'; div.className = 'chat-msg max-w-3xl mx-auto';
-  div.innerHTML = `<div class="flex flex-col items-start gap-1.5"><div class="flex items-center gap-2"><div class="w-6 h-6 bg-tertiary-fixed text-on-tertiary rounded-md flex items-center justify-center animate-pulse text-[10px]">..</div><span class="text-[10px] uppercase font-bold text-on-surface-variant">Pensando</span></div><div class="ml-8 bg-surface-container-lowest border border-outline-variant/10 px-5 py-4 rounded-2xl rounded-tl-none shadow-sm"><div class="flex gap-1.5"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div></div></div>`;
+  div.innerHTML = `<div class="flex flex-col items-start gap-1.5"><div class="flex items-center gap-2"><div class="w-6 h-6 bg-tertiary-fixed text-on-tertiary rounded-md flex items-center justify-center animate-pulse text-[10px]">..</div><span class="text-[10px] uppercase font-bold text-on-surface-variant">Pensando</span></div><div class="ml-8 bg-surface-container-lowest border border-surface-container-low bg-surface-container-lowest px-5 py-4 rounded-2xl rounded-tl-none shadow-sm"><div class="flex gap-1.5"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div></div></div>`;
   container.appendChild(div); container.parentElement.scrollTop = container.parentElement.scrollHeight;
 }
 function removeTypingIndicator() { document.getElementById('typing-indicator')?.remove(); }
@@ -497,7 +497,7 @@ async function loadFileList() {
     const files = res.ok ? await res.json() : [];
     if (!files.length) { tbody.innerHTML = `<div class="p-8 text-center text-sm opacity-50">Nenhum arquivo indexado.</div>`; return; }
     tbody.innerHTML = files.map(f => `
-      <div class="flex items-center justify-between px-6 py-4 border-b border-outline-variant/10 last:border-0 hover:bg-surface-container-low/20 transition-colors">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-surface-container-low bg-surface-container-lowest last:border-0 hover:bg-surface-container-low/20 transition-colors">
         <div class="flex items-center gap-3 flex-1 min-w-0">
           <span class="material-symbols-outlined text-on-surface-variant">description</span>
           <span class="text-sm font-medium truncate">${escapeHtml(f.name)}</span>
@@ -526,7 +526,7 @@ function renderRecentUploads(files) {
     return;
   }
   list.innerHTML = files.map(f => `
-    <div class="flex items-center justify-between p-3 bg-surface-container-low/30 rounded-lg border border-outline-variant/5">
+    <div class="flex items-center justify-between p-3 bg-surface-container-low/30 rounded-lg border border-surface-container-low">
       <div class="flex items-center gap-3">
         <span class="material-symbols-outlined text-green-500 text-sm">check_circle</span>
         <div class="min-w-0">

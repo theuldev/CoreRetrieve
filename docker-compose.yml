@@ -1,6 +1,21 @@
 services:
   app:
     build: .
+    develop:
+      watch:
+        - action: sync
+          path: ./src
+          target: /app/src
+          ignore:
+            - node_modules/
+        - action: sync+restart
+          path: ./config
+          target: /app/config
+        - action: sync+restart
+          path: ./frontend
+          target: /app/frontend
+        - action: rebuild
+          path: package.json
     ports:
       - "8000:8000"
     environment:

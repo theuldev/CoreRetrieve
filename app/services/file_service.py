@@ -4,11 +4,13 @@ from typing import List
 from sqlalchemy.orm import Session
 from app.models.user import User, File
 from app.models.schemas import FileResponse
-
 from app.core.rag import rag_manager
 
 class FileService:
     def save_file_metadata(self, db: Session, user: User, name: str, size: int, content_type: str) -> File:
+        if not name.lower().endswith(".zip"):
+            raise ValueError("Apenas arquivos .zip são permitidos para indexação.")
+
         new_file = File(
             name=name,
             size=size,
@@ -19,18 +21,27 @@ class FileService:
         db.add(new_file)
         db.commit()
         db.refresh(new_file)
-        file_path = f"frontend/documents/{name}"
+        
+        file_path = os.path.abspath(f"frontend/documents/{name}")
+        
         try:
-            api_key = user.rag_config.get("api_key")
+            rag_config = getattr(user, "rag_config", {}) or {}
+            chat_config = getattr(user, "chat_config", {}) or {}
+            api_key = chat_config.get("api_key")
+            print("APIKEY: " + str(api_key))
+            chunk_size = rag_config.get("chunk_size", 512)
+            
             rag_manager.index_file(
-                user.id, 
-                new_file.id, 
-                file_path, 
-                chunk_size=user.rag_config.get("chunk_size", 512),
+                user_id=str(user.id), 
+                file_id=new_file.id, 
+                file_path=file_path, 
+                chunk_size=chunk_size,
                 api_key=api_key
             )
         except Exception as e:
-            print(f"RAG Indexing Error: {e}")
+            import traceback
+            print(f"RAG Indexing Error -> {type(e).__name__}: {str(e)}")
+            print(traceback.format_exc())
             
         return new_file
 

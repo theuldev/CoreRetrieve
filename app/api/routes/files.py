@@ -31,7 +31,7 @@ async def upload_file(
         db, current_user, file.filename, len(content), file.content_type or "application/octet-stream"
     )
 
-@router.get("/", response_model=List[FileResponse])
+@router.get("", response_model=List[FileResponse])
 async def list_files(
     db: Session = Depends(deps.get_db),
     current_user: User = Depends(deps.get_current_user)

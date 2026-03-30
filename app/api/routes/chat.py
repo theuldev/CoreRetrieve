@@ -6,7 +6,7 @@ from app.services.chat_service import chat_service
 
 router = APIRouter()
 
-@router.post("/", response_model=ChatResponse)
+@router.post("", response_model=ChatResponse)
 async def chat(
     request: ChatRequest,
     current_user: User = Depends(deps.get_current_user)

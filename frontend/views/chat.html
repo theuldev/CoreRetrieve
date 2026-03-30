@@ -1,0 +1,56 @@
+<!-- ===== CHAT VIEW ===== -->
+        <section id="view-chat" class="view-panel hidden h-full flex flex-col">
+          <div
+            class="px-6 py-4 border-b border-surface-container-low shrink-0 flex items-center justify-between bg-surface-container-lowest">
+            <div>
+              <div class="flex items-center gap-2 text-tertiary font-medium text-xs mb-1">
+                <span class="material-symbols-outlined text-sm">verified</span>
+                <span>Respostas baseadas nos seus documentos</span>
+              </div>
+              <h2 class="text-xl font-headline font-extrabold text-on-surface">Chat Inteligente</h2>
+            </div>
+            <div class="flex items-center gap-2">
+              <button id="new-chat-btn"
+                class="flex items-center gap-2 text-xs bg-primary text-on-primary px-4 py-2 rounded-xl font-semibold hover:bg-primary-dim transition-all shadow-sm">
+                <span class="material-symbols-outlined text-sm">add</span> Nova Consulta
+              </button>
+            </div>
+          </div>
+
+          <!-- Chat messages -->
+          <div id="chat-messages" class="flex-1 overflow-y-auto px-4 md:px-16 py-8 space-y-8 custom-scrollbar">
+            <!-- Welcome message rendered by JS -->
+          </div>
+
+          <!-- Chat input -->
+          <div
+            class="p-4 md:px-16 bg-surface shrink-0 border-t bg-surface-container-lowest border-surface-container-low">
+            <div class="max-w-3xl mx-auto">
+              <div class="relative group">
+                <div
+                  class="absolute -inset-1 bg-tertiary/20 rounded-2xl blur opacity-0 group-focus-within:opacity-100 transition duration-500">
+                </div>
+                <div
+                  class="relative bg-surface-container-lowest rounded-2xl border border-surface-container-low shadow-lg flex flex-col p-2">
+                  <textarea id="chat-input" rows="1" placeholder="Digite sua dúvida sobre os documentos..."
+                    class="w-full bg-transparent border-none focus:ring-0 resize-none px-4 py-3 text-on-surface text-sm min-h-[52px] max-h-80 outline-none custom-scrollbar"></textarea>
+
+                  <div class="flex items-center justify-between px-2 pb-1">
+                    <div class="flex items-center gap-1">
+                      <button onclick="switchView('upload')"
+                        class="p-2 text-on-surface-variant hover:bg-surface-container-high rounded-lg transition-colors">
+                        <span class="material-symbols-outlined text-xl">attach_file</span>
+                      </button>
+                    </div>
+                    <button id="send-btn" disabled
+                      class="h-10 w-10 bg-primary text-on-primary rounded-xl flex items-center justify-center hover:bg-primary-dim transition-all shadow-md disabled:opacity-40 disabled:cursor-not-allowed">
+                      <span class="material-symbols-outlined">arrow_upward</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <p class="text-[10px] text-center text-on-surface-variant mt-3 opacity-50">O CoreRetrieve pode cometer
+                erros. Verifique informações importantes.</p>
+            </div>
+          </div>
+        </section>

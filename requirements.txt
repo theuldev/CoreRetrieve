@@ -19,3 +19,4 @@ bcrypt
 numpy
 pgvector
 psycopg2-binary
+requests

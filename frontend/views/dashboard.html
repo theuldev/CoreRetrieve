@@ -1,0 +1,171 @@
+<!-- ===== DASHBOARD VIEW ===== -->
+        <section id="view-dashboard" class="view-panel h-full overflow-y-auto p-6 md:p-8">
+          <div class="max-w-7xl mx-auto w-full space-y-8">
+            <div>
+              <h2 class="text-3xl font-headline font-extrabold text-on-surface tracking-tight mb-1">Visão Geral</h2>
+              <p class="text-on-surface-variant">Bem-vindo de volta. Veja aqui o desempenho da sua infraestrutura RAG.</p>
+            </div>
+
+            <!-- KPI Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-5">
+              <div class="bg-surface-container-lowest p-6 rounded-xl shadow-sm flex flex-col justify-between">
+                <div>
+                  <div class="flex items-center justify-between mb-4">
+                    <span class="p-2 bg-primary-container rounded-lg"><span
+                        class="material-symbols-outlined text-primary">query_stats</span></span>
+                    <span class="text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded-full">+12%</span>
+                  </div>
+                  <p class="text-on-surface-variant text-sm font-medium">Consultas Totais</p>
+                  <h3 id="stat-queries" class="text-2xl font-bold mt-1">—</h3>
+                </div>
+                <div class="mt-4 h-1 w-full bg-surface-container rounded-full overflow-hidden">
+                  <div class="h-full bg-primary w-3/4 rounded-full"></div>
+                </div>
+              </div>
+              <div class="bg-surface-container-lowest p-6 rounded-xl shadow-sm flex flex-col justify-between">
+                <div>
+                  <div class="flex items-center justify-between mb-4">
+                    <span class="p-2 bg-secondary-container rounded-lg"><span
+                        class="material-symbols-outlined text-secondary">description</span></span>
+                    <span
+                      class="text-xs font-bold text-on-surface-variant bg-surface-container-low px-2 py-1 rounded-full">Estável</span>
+                  </div>
+                  <p class="text-on-surface-variant text-sm font-medium">Documentos Indexados</p>
+                  <h3 id="stat-docs" class="text-2xl font-bold mt-1">—</h3>
+                </div>
+                <p class="text-[10px] text-on-surface-variant mt-4">Base de conhecimento ativa</p>
+              </div>
+              <div class="bg-surface-container-lowest p-6 rounded-xl shadow-sm flex flex-col justify-between">
+                <div>
+                  <div class="flex items-center justify-between mb-4">
+                    <span class="p-2 bg-tertiary-container/10 rounded-lg"><span
+                        class="material-symbols-outlined text-tertiary">token</span></span>
+                    <span class="text-xs font-bold text-error bg-error/10 px-2 py-1 rounded-full">-5%</span>
+                  </div>
+                  <p class="text-on-surface-variant text-sm font-medium">Sessões de Chat</p>
+                  <h3 id="stat-sessions" class="text-2xl font-bold mt-1">—</h3>
+                </div>
+                <p class="text-[10px] text-on-surface-variant mt-4">Histórico de conversas</p>
+              </div>
+              <div
+                class="bg-primary p-6 rounded-xl text-on-primary flex flex-col justify-between shadow-lg border border-surface-container-low">
+                <div>
+                  <span class="material-symbols-outlined text-3xl mb-2">auto_awesome</span>
+                  <h4 class="text-lg font-bold leading-tight">Otimize seu Contexto</h4>
+                  <p class="text-xs text-on-primary/80 mt-2">Configure o pipeline RAG para máxima precisão semântica.</p>
+                </div>
+                <button onclick="switchView('settings')"
+                  class="mt-4 text-xs font-bold bg-white/20 hover:bg-white/30 transition-colors py-2 px-4 rounded-lg backdrop-blur-sm self-start">
+                  Configurar agora
+                </button>
+              </div>
+            </div>
+
+            <!-- Main grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <!-- Sessions list -->
+              <div class="lg:col-span-2 space-y-6">
+                <div class="bg-surface-container-lowest p-8 rounded-xl shadow-sm">
+                  <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-xl font-bold tracking-tight">Sessões Recentes</h3>
+                    <button onclick="switchView('history')"
+                      class="text-primary text-sm font-bold flex items-center gap-1 hover:underline">
+                      Ver todas <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                    </button>
+                  </div>
+                  <div id="dash-sessions-list" class="space-y-3">
+                    <div class="text-sm text-on-surface-variant italic">Carregando...</div>
+                  </div>
+                </div>
+
+                <!-- Weekly bar chart -->
+                <div class="bg-surface-container-lowest p-8 rounded-xl shadow-sm h-64 flex flex-col">
+                    <h3 class="text-lg font-bold">Atividade Semanal</h3>
+                    <div class="flex items-center gap-4 text-[10px] font-bold uppercase tracking-wider">
+                      <div class="flex items-center gap-1.5"><span class="w-3 h-3 bg-primary rounded-full"></span>
+                        Consultas</div>
+                      <div class="flex items-center gap-1.5"><span
+                          class="w-3 h-3 bg-tertiary-fixed rounded-full"></span> Sessões</div>
+                    </div>
+                  </div>
+                  <div class="flex-1 flex items-end justify-between gap-2 px-2">
+                    <div class="w-full bg-surface-container-low rounded-t-lg h-[40%]"></div>
+                    <div class="w-full bg-surface-container-low rounded-t-lg h-[65%]"></div>
+                    <div class="w-full bg-primary rounded-t-lg h-[85%]"></div>
+                    <div class="w-full bg-surface-container-low rounded-t-lg h-[55%]"></div>
+                    <div class="w-full bg-primary rounded-t-lg h-[95%]"></div>
+                    <div class="w-full bg-surface-container-low rounded-t-lg h-[70%]"></div>
+                    <div class="w-full bg-surface-container-low rounded-t-lg h-[45%]"></div>
+                  </div>
+                  <div class="flex justify-between mt-3 text-[10px] text-on-surface-variant font-bold">
+                    <span>SEG</span><span>TER</span><span>QUA</span><span>QUI</span><span>SEX</span><span>SÁB</span><span>DOM</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Right column -->
+              <div class="lg:col-span-1 space-y-6">
+                <div class="bg-surface-container-lowest p-8 rounded-xl shadow-sm border border-surface-container-low">
+                  <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-xl font-bold tracking-tight">Recursos Ativos</h3>
+                    <button onclick="switchView('chat')"
+                      class="p-2 hover:bg-surface-container-low rounded-full transition-colors">
+                      <span class="material-symbols-outlined text-sm">add_circle</span>
+                    </button>
+                  </div>
+                  <div class="space-y-4">
+                    <div
+                      class="flex items-start gap-4 p-4 rounded-xl bg-surface-container-low/50 border border-transparent hover:border-primary/20 transition-all">
+                      <div
+                        class="w-12 h-12 rounded-full bg-tertiary-fixed/20 flex items-center justify-center shrink-0">
+                        <span class="material-symbols-outlined text-tertiary"
+                          style="font-variation-settings:'FILL' 1">smart_toy</span>
+                      </div>
+                      <div class="flex-1 min-w-0">
+                        <div class="flex items-center justify-between">
+                          <p class="font-bold text-sm">Assistente RAG</p>
+                          <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+                        </div>
+                        <p class="text-[11px] text-on-surface-variant mt-1">Pipeline: Básico + Indexação</p>
+                      </div>
+                    </div>
+                    <div
+                      class="flex items-start gap-4 p-4 rounded-xl bg-surface-container-low/50 border border-transparent hover:border-primary/20 transition-all">
+                      <div
+                        class="w-12 h-12 rounded-full bg-primary-container/20 flex items-center justify-center shrink-0">
+                        <span class="material-symbols-outlined text-primary"
+                          style="font-variation-settings:'FILL' 1">support_agent</span>
+                      </div>
+                      <div class="flex-1 min-w-0">
+                        <div class="flex items-center justify-between">
+                          <p class="font-bold text-sm">Analisador Semântico</p>
+                          <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+                        </div>
+                        <p class="text-[11px] text-on-surface-variant mt-1">Pipeline: Híbrido + Re-ranking</p>
+                      </div>
+                    </div>
+                  </div>
+                  <button onclick="switchView('chat')"
+                    class="w-full mt-6 py-3 bg-surface-container-high hover:bg-surface-container-highest transition-colors rounded-xl text-sm font-bold text-on-surface">
+                    Iniciar Nova Consulta
+                  </button>
+                </div>
+
+                <!-- System status -->
+                <div class="bg-surface-container-low p-6 rounded-xl">
+                  <h4 class="text-sm font-bold mb-4 flex items-center gap-2">
+                    <span class="w-2 h-2 bg-green-500 rounded-full"></span> Status do Sistema
+                  </h4>
+                  <div class="space-y-3">
+                    <div class="flex justify-between text-[11px]"><span class="text-on-surface-variant">API
+                        Backend</span><span class="font-bold text-green-600">Online</span></div>
+                    <div class="flex justify-between text-[11px]"><span class="text-on-surface-variant">Banco de
+                        Dados</span><span class="font-bold">SQLite Local</span></div>
+                    <div class="flex justify-between text-[11px]"><span class="text-on-surface-variant">Processamento
+                        IA</span><span id="stat-model" class="font-bold truncate max-w-[120px]">—</span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>

@@ -1,0 +1,108 @@
+<!-- ===== UPLOAD VIEW ===== -->
+        <section id="view-upload" class="view-panel hidden h-full overflow-y-auto p-6 md:p-8">
+          <div class="max-w-7xl mx-auto w-full space-y-8">
+            <div>
+              <h1 class="text-3xl font-headline font-extrabold text-on-surface tracking-tight mb-1">Upload de Documentos
+              </h1>
+              <p class="text-on-surface-variant">Gerencie seus arquivos para análise inteligente com processamento RAG.
+              </p>
+            </div>
+            <div class="grid grid-cols-12 gap-8">
+              <!-- Upload zone -->
+              <div class="col-span-12 lg:col-span-5 space-y-6">
+                <div id="upload-zone" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)"
+                  ondrop="handleDrop(event)"
+                  class="bg-surface-container-lowest p-8 rounded-xl border-2 border-dashed border-surface-container-low flex flex-col items-center justify-center text-center space-y-4 hover:border-tertiary/50 transition-colors group cursor-pointer h-72">
+                  <input type="file" id="file-input" class="hidden" multiple accept=".pdf,.docx,.txt,.zip" />
+                  <div
+                    class="w-16 h-16 rounded-full bg-tertiary/10 flex items-center justify-center text-tertiary group-hover:scale-110 transition-transform">
+                    <span class="material-symbols-outlined text-4xl">upload_file</span>
+                  </div>
+                  <div class="space-y-1">
+                    <h3 class="text-lg font-headline font-bold text-on-surface">Arraste seus arquivos aqui</h3>
+                    <p class="text-sm text-on-surface-variant max-w-xs">Suporta PDF, DOCX, TXT e pacotes ZIP até 50MB.
+                    </p>
+                  </div>
+                  <button onclick="document.getElementById('file-input').click()"
+                    class="bg-surface-container-high text-on-surface font-headline font-semibold px-6 py-2.5 rounded-xl hover:bg-surface-container-highest transition-colors">
+                    Selecionar Arquivos
+                  </button>
+                </div>
+
+                <!-- Upload queue -->
+                <div id="upload-queue" class="hidden bg-surface-container-low p-6 rounded-xl space-y-3">
+                  <div class="flex items-center justify-between">
+                    <h4 class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Fila de Upload</h4>
+                    <button id="send-files-btn"
+                      class="text-xs font-bold bg-primary text-on-primary px-4 py-1.5 rounded-lg hover:bg-primary-dim transition-all">
+                      Enviar Todos
+                    </button>
+                  </div>
+                  <div id="queue-list" class="space-y-2"></div>
+                </div>
+
+                <!-- Recent activity -->
+                <div class="bg-surface-container-low p-6 rounded-xl space-y-4">
+                  <h4 class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Atividade Recente</h4>
+                  <div id="recent-uploads-list" class="space-y-3">
+                    <div class="text-sm text-on-surface-variant italic">Carregando...</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Managed files table -->
+              <div class="col-span-12 lg:col-span-7">
+                <div
+                  class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden border border-surface-container-low bg-surface-container-lowest">
+                  <div class="p-5 border-b border-surface-container-low flex justify-between items-center">
+                    <h3 class="text-lg font-headline font-bold text-on-surface">Arquivos Gerenciados</h3>
+                    <div class="flex gap-2">
+                      <button
+                        class="p-2 rounded-lg hover:bg-surface-container-high text-on-surface-variant transition-colors">
+                        <span class="material-symbols-outlined text-sm">filter_list</span>
+                      </button>
+                      <button
+                        class="p-2 rounded-lg hover:bg-surface-container-high text-on-surface-variant transition-colors">
+                        <span class="material-symbols-outlined text-sm">more_vert</span>
+                      </button>
+                    </div>
+                  </div>
+                  <div id="files-table-body" class="divide-y divide-surface-container-low">
+                    <div class="p-6 text-sm text-on-surface-variant italic text-center">Nenhum documento enviado ainda.
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Info cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div class="bg-surface-container-high/40 p-5 rounded-xl flex items-start gap-4">
+                <span class="material-symbols-outlined text-primary p-2 bg-primary-container rounded-lg">security</span>
+                <div>
+                  <h5 class="text-sm font-headline font-bold">Privacidade Total</h5>
+                  <p class="text-xs text-on-surface-variant mt-1">Seus documentos são processados localmente e nunca
+                    compartilhados com terceiros.</p>
+                </div>
+              </div>
+              <div class="bg-surface-container-high/40 p-5 rounded-xl flex items-start gap-4">
+                <span
+                  class="material-symbols-outlined text-tertiary p-2 bg-tertiary-container/20 rounded-lg">psychology</span>
+                <div>
+                  <h5 class="text-sm font-headline font-bold">Processamento RAG</h5>
+                  <p class="text-xs text-on-surface-variant mt-1">A busca semântica extrai insights precisos dos seus
+                    dados em segundos.</p>
+                </div>
+              </div>
+              <div class="bg-surface-container-high/40 p-5 rounded-xl flex items-start gap-4">
+                <span
+                  class="material-symbols-outlined text-on-secondary-fixed-variant p-2 bg-secondary-fixed rounded-lg">bolt</span>
+                <div>
+                  <h5 class="text-sm font-headline font-bold">Indexação Rápida</h5>
+                  <p class="text-xs text-on-surface-variant mt-1">Arquivos pequenos são processados em menos de 10
+                    segundos.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>

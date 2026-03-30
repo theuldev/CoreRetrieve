@@ -1,0 +1,247 @@
+<!-- ===== SETTINGS VIEW ===== -->
+<section id="view-settings" class="view-panel hidden h-full overflow-y-auto p-6 md:p-8">
+  <div class="max-w-5xl mx-auto w-full space-y-10">
+    <div>
+      <h2 class="font-headline text-3xl font-extrabold text-on-surface tracking-tight mb-1">Configurações de RAG
+        &amp; IA</h2>
+      <p class="text-on-surface-variant">Ajuste os parâmetros de recuperação e os modelos de linguagem para o
+        seu ambiente.</p>
+    </div>
+
+    <section class="space-y-5">
+      <h3 class="font-headline text-lg font-bold flex items-center gap-2">
+        <span class="material-symbols-outlined text-tertiary">layers</span> Tipo de Arquitetura RAG
+      </h3>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <div id="rag-card-padrao" data-rag="basico" onclick="selectRagCard('basico')"
+          class="rag-arch-card group relative p-6 bg-surface-container-lowest border border-surface-container-low bg-surface-container-lowest rounded-xl hover:border-tertiary/30 transition-all cursor-pointer ring-2 ring-tertiary/40">
+          <div class="flex justify-between items-start mb-4">
+            <div class="w-12 h-12 bg-primary-container/30 flex items-center justify-center rounded-xl text-primary">
+              <span class="material-symbols-outlined">bolt</span>
+            </div>
+            <span
+              class="bg-tertiary/10 text-tertiary text-[10px] font-bold px-2 py-1 rounded uppercase rag-active-badge">Ativo</span>
+          </div>
+          <h4 class="font-bold text-lg mb-2">RAG Básico</h4>
+          <p class="text-sm text-on-surface-variant leading-relaxed">Otimizado para velocidade. Utiliza busca vetorial
+            direta (Similaridade de Cosseno).</p>
+        </div>
+        <div id="rag-card-robusto" data-rag="hibrido" onclick="selectRagCard('hibrido')"
+          class="rag-arch-card group relative p-6 bg-surface-container-low border border-transparent rounded-xl hover:bg-surface-container-high transition-all cursor-pointer">
+          <div class="flex justify-between items-start mb-4">
+            <div
+              class="w-12 h-12 bg-surface-container-highest flex items-center justify-center rounded-xl text-on-surface-variant">
+              <span class="material-symbols-outlined">verified_user</span>
+            </div>
+            <span
+              class="bg-tertiary/10 text-tertiary text-[10px] font-bold px-2 py-1 rounded uppercase rag-active-badge hidden">Ativo</span>
+          </div>
+          <h4 class="font-bold text-lg mb-2">RAG Híbrido</h4>
+          <p class="text-sm text-on-surface-variant leading-relaxed">Focado em precisão. Combina busca vetorial com Deep
+            Search (BM25) para melhores resultados.</p>
+        </div>
+        <div id="rag-card-crag" data-rag="crag" onclick="selectRagCard('crag')"
+          class="rag-arch-card group relative p-6 bg-surface-container-low border border-transparent rounded-xl hover:bg-surface-container-high transition-all cursor-pointer">
+          <div class="flex justify-between items-start mb-4">
+            <div
+              class="w-12 h-12 bg-surface-container-highest flex items-center justify-center rounded-xl text-on-surface-variant">
+              <span class="material-symbols-outlined">travel_explore</span>
+            </div>
+            <span
+              class="bg-tertiary/10 text-tertiary text-[10px] font-bold px-2 py-1 rounded uppercase rag-active-badge hidden">Ativo</span>
+          </div>
+          <h4 class="font-bold text-lg mb-2">CRAG (Web Search)</h4>
+          <p class="text-sm text-on-surface-variant leading-relaxed">Verificação corretiva com busca web. Ideal
+            quando os documentos internos podem ser insuficientes.</p>
+        </div>
+      </div>
+
+      <!-- CRAG Settings Container -->
+      <div id="crag-settings-container"
+        class="hidden mt-6 p-6 rounded-xl border border-tertiary/30 bg-tertiary/5 space-y-4">
+        <h4 class="font-bold text-md text-tertiary flex items-center gap-2"><span
+            class="material-symbols-outlined text-sm">public</span> Configuração de Busca Web</h4>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label
+              class="text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2 block">Provedor</label>
+            <select id="crag-provider"
+              class="w-full bg-surface-container-lowest border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-tertiary/20 outline-none">
+              <option value="tavily">Tavily</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2 block">API Key (Busca
+              Web)</label>
+            <input id="crag-api-key" type="password" placeholder="Chave do Provedor"
+              class="w-full bg-surface-container-lowest border-none rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-tertiary/20 outline-none" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Advanced settings grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      <!-- Left: Tuning knobs -->
+      <div class="lg:col-span-7 space-y-8">
+        <div class="bg-surface-container-lowest p-8 rounded-xl space-y-8 border border-surface-container-low">
+          <div class="space-y-4">
+            <div class="flex items-center justify-between">
+              <label class="font-bold text-sm">Quantidade de Chunks (Top-K)</label>
+              <span id="topk-display" class="text-tertiary font-mono font-bold">5</span>
+            </div>
+            <input id="topk-slider" type="range" min="1" max="20" value="5"
+              oninput="document.getElementById('topk-display').textContent=this.value"
+              class="w-full h-1.5 bg-surface-container-high rounded-full appearance-none cursor-pointer accent-tertiary" />
+            <div class="flex justify-between text-[10px] text-on-surface-variant font-medium">
+              <span>VELOCIDADE</span><span>CONTEXTO AMPLO</span>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2 block">Tamanho do
+                Chunk</label>
+              <input id="chunk-size" type="number" value="512" min="128" max="2048" step="64"
+                class="w-full bg-surface-container-low border-none rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-tertiary/20 outline-none" />
+            </div>
+            <div>
+              <label class="text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2 block">Overlap
+                (tokens)</label>
+              <input id="chunk-overlap" type="number" value="64" min="0" max="512" step="16"
+                class="w-full bg-surface-container-low border-none rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-tertiary/20 outline-none" />
+            </div>
+          </div>
+          <div class="pt-4 border-t border-surface-container-low bg-surface-container-lowest space-y-4">
+            <h4 class="text-xs font-bold uppercase tracking-wider text-on-surface-variant/70">Otimizações do
+              Motor</h4>
+            <div
+              class="flex items-center justify-between p-3 rounded-lg hover:bg-surface-container-low transition-colors">
+              <div>
+                <p class="text-sm font-semibold">Re-ranking de Resultados</p>
+                <p class="text-xs text-on-surface-variant">Reordena chunks baseado em relevância cruzada.</p>
+              </div>
+              <label class="toggle-switch"><input type="checkbox" id="toggle-reranking" />
+                <div class="toggle-track"></div>
+              </label>
+            </div>
+            <div
+              class="flex items-center justify-between p-3 rounded-lg hover:bg-surface-container-low transition-colors">
+              <div>
+                <p class="text-sm font-semibold text-tertiary-fixed-dim">Busca Híbrida (BM25 + Vector)</p>
+                <p class="text-xs text-on-surface-variant">Combina busca por palavra-chave e significado
+                  vetorial.</p>
+              </div>
+              <label class="toggle-switch"><input type="checkbox" id="toggle-hybrid" checked />
+                <div class="toggle-track"></div>
+              </label>
+            </div>
+            <div
+              class="flex items-center justify-between p-3 rounded-lg hover:bg-surface-container-low transition-colors">
+              <div>
+                <p class="text-sm font-semibold">Filtro de Similaridade Semântica</p>
+                <p class="text-xs text-on-surface-variant">Ignora chunks com score abaixo de 0.75.</p>
+              </div>
+              <label class="toggle-switch"><input type="checkbox" id="toggle-similarity" />
+                <div class="toggle-track"></div>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: AI Provider -->
+      <aside class="lg:col-span-5 space-y-5">
+        <div
+          class="bg-surface-container border bg-surface-container-lowest border-surface-container-low rounded-xl p-8 space-y-6 ">
+          <h3 class="font-headline text-lg font-bold flex items-center gap-2">
+            <span class="material-symbols-outlined text-tertiary">psychology</span> Provedor de IA
+          </h3>
+          <div class="space-y-4">
+            <div>
+              <label
+                class="text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2 block">Provedor</label>
+              <div class="relative">
+                <select id="llm-provider" onchange="updateModels()"
+                  class="w-full bg-surface-container-lowest border-none rounded-xl py-3 px-4 text-sm focus:ring-2 focus:ring-tertiary/20 appearance-none cursor-pointer outline-none">
+                  <option value="gemini">Google Gemini</option>
+                  <option value="openai">OpenAI</option>
+                  <option value="claude">Anthropic Claude</option>
+                </select>
+                <span
+                  class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none">unfold_more</span>
+              </div>
+            </div>
+            <div>
+              <label
+                class="text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2 block">Modelo</label>
+              <div class="relative">
+                <select id="llm-model"
+                  class="w-full bg-surface-container-lowest border-none rounded-xl py-3 px-4 text-sm focus:ring-2 focus:ring-tertiary/20 appearance-none cursor-pointer outline-none">
+                  <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
+                  <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
+                </select>
+                <span
+                  class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none">unfold_more</span>
+              </div>
+            </div>
+            <div>
+              <label class="text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2 block">API
+                Key (Opcional)</label>
+              <div class="relative">
+                <input id="llm-api-key" type="password" placeholder="Usar chave do servidor"
+                  class="w-full bg-surface-container-lowest border-none rounded-xl py-3 px-4 text-sm focus:ring-2 focus:ring-tertiary/20 outline-none" />
+              </div>
+              <p class="text-[10px] text-on-surface-variant/70 italic px-1 mt-1">Sua chave é criptografada
+                localmente.</p>
+            </div>
+          </div>
+          <div class="bg-tertiary-fixed/10 p-4 rounded-lg border border-tertiary-fixed/20">
+            <div class="flex gap-3">
+              <span class="material-symbols-outlined text-tertiary">verified</span>
+              <div>
+                <p class="text-sm font-bold">Conexão Ativa</p>
+                <p class="text-xs text-on-surface-variant">Backend FastAPI em execução</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          class="p-5 bg-surface-container-low rounded-xl flex items-start gap-4 border bg-surface-container-lowest border-surface-container-low">
+          <span class="material-symbols-outlined text-primary-dim">lightbulb</span>
+          <div>
+            <p class="text-xs font-bold uppercase tracking-widest opacity-60 mb-1">Dica Pro</p>
+            <p class="text-sm text-on-surface-variant leading-relaxed">Para documentos técnicos complexos,
+              prefira <strong>RAG Híbrido</strong> com <strong>Gemini 1.5 Pro</strong> para melhores insights
+              semânticos.</p>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <!-- Danger zone -->
+    <div class="pt-6 border-t bg-surface-container-lowest border-surface-container-low">
+      <h3 class="font-headline text-lg font-bold text-error mb-4 flex items-center gap-2"><span
+          class="material-symbols-outlined">warning</span> Zona de Perigo</h3>
+      <div class="bg-error/5 border border-error/20 rounded-xl p-5 flex items-center justify-between">
+        <div>
+          <p class="text-sm font-bold text-on-surface">Apagar Toda Memória</p>
+          <p class="text-xs text-on-surface-variant mt-0.5">Remove permanentemente todas as sessões e histórico
+            de chat.</p>
+        </div>
+        <button id="clear-all-btn"
+          class="px-4 py-2 rounded-xl text-sm font-bold text-error border border-error/30 hover:bg-error hover:text-white transition-all">Apagar</button>
+      </div>
+    </div>
+
+    <!-- Footer save -->
+    <footer
+      class="flex items-center justify-end gap-4 pt-4 border-t border-surface-container-low bg-surface-container-lowest">
+      <button
+        class="px-6 py-2.5 rounded-lg text-sm font-bold text-on-surface-variant hover:bg-surface-container-high transition-all">Descartar</button>
+      <button id="save-settings-btn"
+        class="px-8 py-2.5 rounded-xl text-sm font-bold bg-primary text-on-primary shadow-lg hover:bg-primary-dim transition-all active:scale-[0.98]">
+        Salvar Configurações
+      </button>
+    </footer>
+  </div>
+</section>

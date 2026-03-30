@@ -9,10 +9,14 @@ import os
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Using PostgreSQL for session storage
 db = None
 if settings.DATABASE_URL:
-    db = PostgresDb(session_table="agno_sessions", db_url=settings.DATABASE_URL)
+    try:
+        db = PostgresDb(session_table="agno_sessions", db_url=settings.DATABASE_URL)
+        if db:
+            logger.info("Agno PostgresDb initialized successfully.")
+    except Exception as e:
+        logger.error(f"Failed to initialize Agno PostgresDb: {e}")
 
 def get_llm_model(provider: str, model_id: str, api_key: str = None):
     """Instantiates the correct Agno model class based on provider and model ID."""

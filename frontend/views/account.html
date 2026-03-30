@@ -1,0 +1,29 @@
+<!-- ===== ACCOUNT VIEW ===== -->
+        <section id="view-account" class="view-panel hidden h-full overflow-y-auto p-6 md:p-8">
+          <div class="max-w-2xl mx-auto w-full space-y-6">
+            <div>
+              <h2 class="font-headline text-3xl font-extrabold text-on-surface tracking-tight mb-1">Conta</h2>
+              <p class="text-on-surface-variant">Informações da sua conta e sessão atual.</p>
+            </div>
+            
+            <div class="bg-surface-container-lowest border border-surface-container-low rounded-2xl p-6 shadow-sm">
+              <div class="flex items-center gap-4 mb-6">
+                <div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center text-primary">
+                  <span class="material-symbols-outlined text-3xl">person</span>
+                </div>
+                <div>
+                  <p class="text-sm text-on-surface-variant uppercase tracking-wider font-bold mb-1">Email Logado</p>
+                  <p id="account-email" class="text-xl font-headline font-bold text-on-surface">Carregando...</p>
+                </div>
+              </div>
+              
+              <div class="h-px bg-surface-container-low my-6"></div>
+
+              <div>
+                 <button id="account-logout-btn" class="w-full md:w-auto px-6 py-2.5 bg-error text-white font-bold rounded-xl shadow-sm hover:opacity-90 transition-opacity flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined text-sm">logout</span> Encerrar Sessão
+                 </button>
+              </div>
+            </div>
+          </div>
+        </section>

@@ -33,3 +33,4 @@ class File(Base):
     type = Column(String, nullable=False)
     created_at = Column(Integer, nullable=False)
     user_id = Column(String, index=True, nullable=False)
+    status = Column(String, default="processed")

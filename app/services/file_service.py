@@ -3,13 +3,10 @@ import time
 from typing import List
 from sqlalchemy.orm import Session
 from app.models.user import User, File
-from app.models.schemas import FileResponse
-from app.core.rag import rag_manager
+from app.core.rag.manager import rag_manager
 
 class FileService:
     def save_file_metadata(self, db: Session, user: User, name: str, size: int, content_type: str) -> File:
-        if not name.lower().endswith(".zip"):
-            raise ValueError("Apenas arquivos .zip são permitidos para indexação.")
 
         new_file = File(
             name=name,
@@ -28,7 +25,6 @@ class FileService:
             rag_config = getattr(user, "rag_config", {}) or {}
             chat_config = getattr(user, "chat_config", {}) or {}
             api_key = chat_config.get("api_key")
-            print("APIKEY: " + str(api_key))
             chunk_size = rag_config.get("chunk_size", 512)
             
             rag_manager.index_file(
@@ -38,10 +34,8 @@ class FileService:
                 chunk_size=chunk_size,
                 api_key=api_key
             )
-        except Exception as e:
-            import traceback
-            print(f"RAG Indexing Error -> {type(e).__name__}: {str(e)}")
-            print(traceback.format_exc())
+        except Exception:
+            pass
             
         return new_file
 
@@ -51,6 +45,11 @@ class FileService:
     def delete_file(self, db: Session, user: User, file_id: int) -> bool:
         file = db.query(File).filter(File.id == file_id, File.user_id == user.id).first()
         if file:
+            try:
+                rag_manager.vector_store.delete_file_chunks(user_id=str(user.id), file_id=file_id)
+            except Exception:
+                pass
+            
             db.delete(file)
             db.commit()
             return True

@@ -19,13 +19,49 @@ class SessionService:
             title = "Nova Conversa"
             if s.session_data and "title" in s.session_data:
                 title = s.session_data["title"]
-                
+            
+            history = s.get_chat_history()
+            message_count = len(history) if history else 0
+            
             result.append({
-                "session_id": s.session_id.replace(f"{current_user.id}_", ""),
+                "id": s.session_id.replace(f"{current_user.id}_", ""),
                 "title": title,
-                "created_at": s.created_at
+                "created_at": s.created_at,
+                "updated_at": s.updated_at or s.created_at,
+                "message_count": message_count
             })
         return result
+
+    def get_session_detail(self, current_user: User, session_id: str) -> dict:
+        actual_session_id = f"{current_user.id}_{session_id}"
+        
+        session_data = session_repository.get_session(actual_session_id, SessionType.AGENT)
+        if not session_data:
+            session_data = session_repository.get_session(actual_session_id, SessionType.TEAM)
+            
+        if not session_data:
+            raise HTTPException(status_code=404, detail="Session not found")
+        
+        history = session_data.get_chat_history()
+        
+        messages = []
+        for msg in history:
+            messages.append({
+                "role": msg.role,
+                "content": msg.content or "",
+                "created_at": msg.created_at
+            })
+            
+        title = "Nova Conversa"
+        if session_data.session_data and "title" in session_data.session_data:
+            title = session_data.session_data["title"]
+            
+        return {
+            "id": session_id,
+            "title": title,
+            "created_at": session_data.created_at,
+            "messages": messages
+        }
 
     def get_session_history(self, current_user: User, session_id: str) -> list[dict]:
         actual_session_id = f"{current_user.id}_{session_id}"

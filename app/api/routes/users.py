@@ -8,6 +8,7 @@ from app.services.user_service import user_service
 
 router = APIRouter()
 
+@router.get("/me", response_model=UserResponse)
 @router.get("/me/settings", response_model=UserResponse)
 def get_user_settings(current_user: User = Depends(deps.get_current_user)) -> Any:
     """Get current user settings."""

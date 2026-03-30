@@ -3,6 +3,9 @@ from app.core.agno_agent import db
 from agno.db.base import SessionType
 
 class SessionRepository:
+    def __init__(self):
+        self.db = db
+
     def get_session(self, session_id: str, session_type: SessionType = SessionType.AGENT) -> Optional[Any]:
         return db.get_session(session_id, session_type)
         

@@ -63,7 +63,7 @@ class SessionService:
             "messages": messages
         }
 
-    def get_session_history(self, current_user: User, session_id: str) -> list[dict]:
+    def get_session_messages(self, current_user: User, session_id: str) -> list[dict]:
         actual_session_id = f"{current_user.id}_{session_id}"
         
         session_data = session_repository.get_session(actual_session_id, SessionType.AGENT)

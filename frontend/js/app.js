@@ -1,32 +1,44 @@
 'use strict';
 
-const loadedViews = new Set();
+const VALID_VIEWS = ['dashboard', 'chat', 'upload', 'history', 'settings', 'account'];
+window.API = '/api/v1'; 
 
-async function switchView(path, pushHist = true) {
-  let viewId = path.replace(/^\/+/g, '') || 'dashboard';
-  let params = null;
-
-  if (viewId.includes('/')) {
-    const parts = viewId.split('/').filter(Boolean);
-    viewId = parts[0];
-    params = parts[1];
+window.getHeaders = function(isJson = false) {
+  const token = localStorage.getItem('access_token');
+  const headers = {};
+  
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
   }
-
-  const validViews = ['dashboard', 'chat', 'upload', 'history', 'settings', 'account'];
-  if (!validViews.includes(viewId)) {
-    viewId = 'dashboard';
+  
+  if (isJson) {
+    headers['Content-Type'] = 'application/json';
   }
+  
+  return headers;
+};
+function parsePath(pathname) {
+  const parts = pathname.replace(/^\/+/, '').split('/').filter(Boolean);
+  const viewId = VALID_VIEWS.includes(parts[0]) ? parts[0] : 'dashboard';
+  const param  = parts[1] || null;
+  return { viewId, param };
+}
 
-  if (pushHist) {
-    const newPath = params ? `/${viewId}/${params}` : `/${viewId}`;
-    if (window.location.pathname !== newPath) {
-      window.history.pushState(null, '', newPath);
+async function switchView(path, push = true) {
+  const { viewId, param } = parsePath('/' + String(path).replace(/^\/+/, ''));
+
+  if (push) {
+    const url = param ? `/${viewId}/${param}` : `/${viewId}`;
+    if (window.location.pathname !== url) {
+      window.history.pushState({ viewId, param }, '', url);
     }
   }
 
-  document.querySelectorAll('.app-nav-link, .mob-nav-link, .mob-nav, .nav-item').forEach(l => {
-    l.classList.remove('bg-surface-container-low', 'text-primary', 'font-bold');
-    if (l.dataset.view === viewId) l.classList.add('bg-surface-container-low', 'text-primary', 'font-bold');
+  document.querySelectorAll('[data-view]').forEach(el => {
+    const active = el.dataset.view === viewId;
+    el.classList.toggle('bg-surface-container-low', active);
+    el.classList.toggle('text-primary', active);
+    el.classList.toggle('font-bold', active);
   });
 
   const container = document.getElementById('view-container');
@@ -35,182 +47,133 @@ async function switchView(path, pushHist = true) {
   Array.from(container.children).forEach(c => c.classList.add('hidden'));
 
   let viewEl = document.getElementById(`view-${viewId}`);
+
   if (!viewEl) {
     try {
       const res = await fetch(`/views/${viewId}.html`);
-      if (res.ok) {
-        const html = await res.text();
-        const wrapper = document.createElement('div');
-        wrapper.innerHTML = html;
-        viewEl = wrapper.firstElementChild;
-        container.appendChild(viewEl);
-
-        // Inicializa scripts específicos
-        if (viewId === 'chat' && window.initChat) window.initChat(params);
-        if (viewId === 'settings' && window.initSettings) window.initSettings();
-        if (viewId === 'upload' && window.initUpload) window.initUpload();
-        if (viewId === 'dashboard' && window.loadDashboard) window.loadDashboard();
-        if (viewId === 'history' && window.loadHistory) window.loadHistory();
-        if (viewId === 'account' && window.initAccount) window.initAccount();
-      } else {
-        // Se falhar ao carregar o HTML da view, volta pro dashboard
-        if (viewId !== 'dashboard') switchView('dashboard');
-      }
-    } catch (e) {
-      console.error(e);
-      if (viewId !== 'dashboard') switchView('dashboard');
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const html = await res.text();
+      const wrapper = document.createElement('div');
+      wrapper.innerHTML = html;
+      viewEl = wrapper.firstElementChild;
+      if (!viewEl) throw new Error('Empty fragment');
+      container.appendChild(viewEl);
+      _initView(viewId, param);
+      viewEl.classList.remove('hidden');
+    } catch (err) {
+      console.error(err);
+      if (viewId !== 'dashboard') { switchView('dashboard'); return; }
     }
   } else {
     viewEl.classList.remove('hidden');
-    // Re-inicializa dados mesmo que a view já exista
-    if (viewId === 'chat' && window.initChat) window.initChat(params);
-    if (viewId === 'dashboard' && window.loadDashboard) window.loadDashboard();
-    if (viewId === 'history' && window.loadHistory) window.loadHistory();
+    _refreshView(viewId, param);
   }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  const initialPath = window.location.pathname;
-  switchView(initialPath, true);
-});
+function _initView(viewId, param) {
+  switch (viewId) {
+    case 'dashboard': if (window.loadDashboard)   window.loadDashboard(); break;
+    case 'chat':      if (window.initChat)         window.initChat(param); break;
+    case 'upload':    if (window.initUpload)       window.initUpload(); break;
+    case 'history':
+      if (window.initHistory) window.initHistory();
+      if (window.loadHistory) window.loadHistory();
+      break;
+    case 'settings':  if (window.initSettings)    window.initSettings(); break;
+    case 'account':
+      if (window.initAccount)     window.initAccount();
+      if (window.loadAccountInfo) window.loadAccountInfo();
+      break;
+  }
+}
 
-const initialPath = window.location.pathname.replace(/^\/+/g, '');
-switchView(initialPath || 'dashboard', !initialPath);
-
-window.addEventListener('popstate', () => {
-  const newPath = window.location.pathname.replace(/^\/+/g, '') || 'dashboard';
-  switchView(newPath, false);
-});
-
-document.querySelectorAll('.app-nav-link, .mob-nav-link, .mob-nav, .nav-item').forEach(el => {
-  el.addEventListener('click', e => {
-    e.preventDefault();
-    switchView(e.currentTarget.dataset.view);
-  });
-});
-
-window.switchView = switchView;
+function _refreshView(viewId, param) {
+  switch (viewId) {
+    case 'dashboard': if (window.loadDashboard)   window.loadDashboard(); break;
+    case 'history':   if (window.loadHistory)     window.loadHistory(); break;
+    case 'account':   if (window.loadAccountInfo) window.loadAccountInfo(); break;
+    case 'chat':      if (window.initChat)        window.initChat(param); break;
+  }
+}
 
 function applyTheme(th) {
   const root = document.documentElement;
-  if (th === 'dark') { root.classList.add('dark'); localStorage.theme = 'dark'; }
-  else if (th === 'light') { root.classList.remove('dark'); localStorage.theme = 'light'; }
-  else {
+  if (th === 'dark') {
+    root.classList.add('dark');
+    localStorage.theme = 'dark';
+  } else if (th === 'light') {
+    root.classList.remove('dark');
+    localStorage.theme = 'light';
+  } else {
     if (window.matchMedia('(prefers-color-scheme: dark)').matches) root.classList.add('dark');
     else root.classList.remove('dark');
     localStorage.removeItem('theme');
   }
 }
-window.applyTheme = applyTheme;
 
-function initApp() {
-  if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+function _restoreTheme() {
+  if (
+    localStorage.theme === 'dark' ||
+    (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)
+  ) {
     document.documentElement.classList.add('dark');
   } else {
     document.documentElement.classList.remove('dark');
   }
-
-  if (window.loadUserSettings) loadUserSettings();
-
-  const initialHash = window.location.hash.replace('#', '') || 'dashboard';
-  switchView(initialHash, false);
-
-  window.addEventListener('popstate', () => {
-    const newHash = window.location.hash.replace('#', '') || 'dashboard';
-    switchView(newHash, false);
-  });
-
-  document.querySelectorAll('.app-nav-link, .mob-nav-link, .mob-nav, .nav-item').forEach(el => {
-    el.addEventListener('click', e => {
-      e.preventDefault();
-      switchView(e.currentTarget.dataset.view);
-    });
-  });
-
-  document.getElementById('mob-menu-btn')?.addEventListener('click', () => {
-    document.getElementById('mob-sidebar').classList.remove('-translate-x-full');
-    document.getElementById('mob-sidebar-overlay').classList.remove('hidden');
-  });
-  const cmb = () => {
-    document.getElementById('mob-sidebar').classList.add('-translate-x-full');
-    document.getElementById('mob-sidebar-overlay').classList.add('hidden');
-  };
-  document.getElementById('mob-close-btn')?.addEventListener('click', cmb);
-  document.getElementById('mob-sidebar-overlay')?.addEventListener('click', cmb);
-
-  document.getElementById('darkmode-btn')?.addEventListener('click', () => {
-    const isDark = document.documentElement.classList.contains('dark');
-    applyTheme(isDark ? 'light' : 'dark');
-  });
 }
-window.initApp = initApp;
 
-document.addEventListener('DOMContentLoaded', () => {
-  if (window.initAuth) initAuth();
-});
-document.querySelectorAll('.app-nav-link, .mob-nav-link, .mob-nav, .nav-item').forEach(el => {
-  el.addEventListener('click', e => {
-    e.preventDefault();
-    switchView(e.currentTarget.dataset.view);
-  });
-});
+function initApp() {
+  _restoreTheme();
+
+  if (!window._navListenersAttached) {
+    window._navListenersAttached = true;
+
+    document.querySelectorAll('[data-view]').forEach(el => {
+      el.addEventListener('click', e => {
+        e.preventDefault();
+        const view = e.currentTarget.dataset.view;
+        if (view) switchView(view);
+        
+        document.getElementById('mob-sidebar')?.classList.add('-translate-x-full');
+        document.getElementById('mob-sidebar-overlay')?.classList.add('hidden');
+      });
+    });
+
+    document.getElementById('mob-menu-btn')?.addEventListener('click', () => {
+      document.getElementById('mob-sidebar')?.classList.remove('-translate-x-full');
+      document.getElementById('mob-sidebar-overlay')?.classList.remove('hidden');
+    });
+
+    const closeMobile = () => {
+      document.getElementById('mob-sidebar')?.classList.add('-translate-x-full');
+      document.getElementById('mob-sidebar-overlay')?.classList.add('hidden');
+    };
+    document.getElementById('mob-close-btn')?.addEventListener('click', closeMobile);
+    document.getElementById('mob-sidebar-overlay')?.addEventListener('click', closeMobile);
+
+    document.getElementById('darkmode-btn')?.addEventListener('click', () => {
+      applyTheme(document.documentElement.classList.contains('dark') ? 'light' : 'dark');
+    });
+
+    document.getElementById('logout-btn')?.addEventListener('click', () => {
+      if (window.logout) window.logout();
+    });
+
+    window.addEventListener('popstate', () => {
+      const { viewId, param } = parsePath(window.location.pathname);
+      switchView(param ? `${viewId}/${param}` : viewId, false);
+    });
+  }
+
+  const { viewId, param } = parsePath(window.location.pathname);
+  switchView(param ? `${viewId}/${param}` : viewId, false);
+}
 
 window.switchView = switchView;
-
-function applyTheme(th) {
-  const root = document.documentElement;
-  if (th === 'dark') { root.classList.add('dark'); localStorage.theme = 'dark'; }
-  else if (th === 'light') { root.classList.remove('dark'); localStorage.theme = 'light'; }
-  else {
-    if (window.matchMedia('(prefers-color-scheme: dark)').matches) root.classList.add('dark');
-    else root.classList.remove('dark');
-    localStorage.removeItem('theme');
-  }
-}
 window.applyTheme = applyTheme;
-
-function initApp() {
-  if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-    document.documentElement.classList.add('dark');
-  } else {
-    document.documentElement.classList.remove('dark');
-  }
-
-  if (window.loadUserSettings) loadUserSettings();
-
-  const initialHash = window.location.hash.replace('#', '') || 'dashboard';
-  switchView(initialHash, false);
-
-  window.addEventListener('popstate', () => {
-    const newHash = window.location.hash.replace('#', '') || 'dashboard';
-    switchView(newHash, false);
-  });
-
-  document.querySelectorAll('.app-nav-link, .mob-nav-link, .mob-nav, .nav-item').forEach(el => {
-    el.addEventListener('click', e => {
-      e.preventDefault();
-      switchView(e.currentTarget.dataset.view);
-    });
-  });
-
-  document.getElementById('mob-menu-btn')?.addEventListener('click', () => {
-    document.getElementById('mob-sidebar').classList.remove('-translate-x-full');
-    document.getElementById('mob-sidebar-overlay').classList.remove('hidden');
-  });
-  const cmb = () => {
-    document.getElementById('mob-sidebar').classList.add('-translate-x-full');
-    document.getElementById('mob-sidebar-overlay').classList.add('hidden');
-  };
-  document.getElementById('mob-close-btn')?.addEventListener('click', cmb);
-  document.getElementById('mob-sidebar-overlay')?.addEventListener('click', cmb);
-
-  document.getElementById('darkmode-btn')?.addEventListener('click', () => {
-    const isDark = document.documentElement.classList.contains('dark');
-    applyTheme(isDark ? 'light' : 'dark');
-  });
-}
-window.initApp = initApp;
+window.initApp    = initApp;
 
 document.addEventListener('DOMContentLoaded', () => {
-  if (window.initAuth) initAuth();
+  _restoreTheme();
+  if (window.initAuth) window.initAuth();
 });

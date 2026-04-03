@@ -12,10 +12,10 @@ async def list_sessions(current_user: User = Depends(deps.get_current_user)):
     """List all active team sessions."""
     return session_service.list_sessions(current_user)
 
-@router.get("/{session_id}/history", response_model=List[MessageSchema])
-async def get_session_history(session_id: str, current_user: User = Depends(deps.get_current_user)):
+@router.get("/{session_id}/messages", response_model=List[MessageSchema])
+async def get_session_messages(session_id: str, current_user: User = Depends(deps.get_current_user)):
     """Get chat history for a specific session."""
-    return session_service.get_session_history(current_user, session_id)
+    return session_service.get_session_messages(current_user, session_id)
 
 @router.get("/{session_id}", response_model=SessionDetailResponse)
 async def get_session(session_id: str, current_user: User = Depends(deps.get_current_user)):

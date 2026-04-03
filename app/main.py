@@ -55,8 +55,14 @@ app.mount("/views", StaticFiles(directory="frontend/views"), name="views")
 app.mount("/documents", StaticFiles(directory="frontend/documents"), name="documents")
 
 @app.get("/{full_path:path}")
-async def serve_frontend(full_path: str):
-    file_path = os.path.join("frontend", full_path)
+async def serve(full_path: str):
+    clean_path = full_path.split('?')[0].strip("/")
+    file_path = os.path.join("frontend", clean_path)
+
     if os.path.isfile(file_path):
         return FileResponse(file_path)
+
+    if clean_path.startswith("api"):
+        return {"detail": "Not Found"}, 404
+
     return FileResponse("frontend/index.html")
